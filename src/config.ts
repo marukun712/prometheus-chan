@@ -36,6 +36,19 @@ export const Character = z.object({
 			),
 		}),
 	),
+	eventParts: z.array(z.string()),
+	reactions: z.array(
+		z.object({
+			event: z.string(),
+			when: z.enum(["rise", "fall"]),
+			says: z.array(
+				z.object({
+					text: z.string(),
+					voice: z.string(),
+				}),
+			),
+		}),
+	),
 });
 export type Character = z.infer<typeof Character>;
 
@@ -63,6 +76,15 @@ function readCharacter(doc: Document) {
 				voice: arg(s, 1),
 			})),
 		})),
+		eventParts: doc.findNodesByName("event").map((n) => arg(n)),
+		reactions: doc.findNodesByName("react").map((n) => ({
+			event: arg(n),
+			when: n.getProperty("when"),
+			says: n.children?.findNodesByName("say").map((s) => ({
+				text: arg(s, 0),
+				voice: arg(s, 1),
+			})),
+		})),
 	};
 }
 
@@ -70,6 +92,9 @@ export const Metric = z.object({
 	prometheus: z.object({
 		url: z.string(),
 		interval: z.string(),
+	}),
+	server: z.object({
+		port: z.number(),
 	}),
 	signals: z.array(
 		z.object({
@@ -82,10 +107,14 @@ export type Metric = z.infer<typeof Metric>;
 
 function readMetric(doc: Document) {
 	const p = doc.findNodeByName("prometheus");
+	const s = doc.findNodeByName("server");
 	return {
 		prometheus: {
 			url: p?.getProperty("url"),
 			interval: p?.getProperty("interval"),
+		},
+		server: {
+			port: s?.getProperty("port"),
 		},
 		signals: doc.findNodesByName("signal").map((n) => ({
 			part: arg(n),

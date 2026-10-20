@@ -13,11 +13,6 @@ part "hands" "手"
 part "ears" "耳"
 part "skin" "体温"
 part "belly" "お腹"
-on "head" from="ok" to="ok" {
-    say "のんびり考えごと中〜" "voice/head_idle_1.ogg"
-    say "今日は頭が冴えてるかも" "voice/head_idle_2.ogg"
-    say "ひまだな〜、何かすることない？" "voice/head_idle_3.ogg"
-}
 on "head" from="*" to="mild" {
     say "ちょっと考えごと増えてきた" "voice/head_mild_1.ogg"
     say "忙しくなってきたね" "voice/head_mild_2.ogg"
@@ -34,10 +29,6 @@ on "head" from="hard,critical" to="ok" {
     say "ふぅ、ひと段落" "voice/head_ok_1.ogg"
     say "頭すっきりした" "voice/head_ok_2.ogg"
 }
-on "hands" from="ok" to="ok" {
-    say "手ぶらで身軽だよ" "voice/hands_idle_1.ogg"
-    say "何か持とうか？" "voice/hands_idle_2.ogg"
-}
 on "hands" from="*" to="mild" {
     say "持ち物が増えてきたな" "voice/hands_mild_1.ogg"
 }
@@ -52,10 +43,6 @@ on "hands" from="*" to="critical" {
 on "hands" from="hard,critical" to="ok" {
     say "手が空いた〜" "voice/hands_ok_1.ogg"
 }
-on "ears" from="ok" to="ok" {
-    say "よく聞こえてるよ" "voice/ears_idle_1.ogg"
-    say "静かでいいね〜" "voice/ears_idle_2.ogg"
-}
 on "ears" from="*" to="mild" {
     say "ん？今なんて言った？" "voice/ears_mild_1.ogg"
 }
@@ -68,10 +55,6 @@ on "ears" from="*" to="critical" {
 }
 on "ears" from="hard,critical" to="ok" {
     say "あ、ちゃんと聞こえる" "voice/ears_ok_1.ogg"
-}
-on "skin" from="ok" to="ok" {
-    say "ちょうどいい体温だね" "voice/skin_idle_1.ogg"
-    say "ぽかぽかして気持ちいい〜" "voice/skin_idle_2.ogg"
 }
 on "skin" from="*" to="mild" {
     say "ちょっとあったかいね" "voice/skin_mild_1.ogg"
@@ -86,10 +69,6 @@ on "skin" from="*" to="critical" {
 on "skin" from="hard,critical" to="ok" {
     say "熱、下がったみたい" "voice/skin_ok_1.ogg"
 }
-on "belly" from="ok" to="ok" {
-    say "腹八分目、ちょうどいい感じ" "voice/belly_idle_1.ogg"
-    say "まだまだ入るよ〜" "voice/belly_idle_2.ogg"
-}
 on "belly" from="*" to="mild" {
     say "そろそろお腹いっぱいかも" "voice/belly_mild_1.ogg"
 }
@@ -101,4 +80,12 @@ on "belly" from="*" to="critical" {
 }
 on "belly" from="hard,critical" to="ok" {
     say "お腹空いてきた..." "voice/belly_ok_1.ogg"
+}
+event "visitor"
+react "visitor" when="rise" {
+    say "あ、誰か来た！" "voice/visitor_1.ogg"
+    say "いらっしゃい〜" "voice/visitor_2.ogg"
+}
+react "visitor" when="fall" {
+    say "みんな帰っちゃった..." "voice/visitor_bye_1.ogg"
 }

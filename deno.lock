@@ -4,7 +4,6 @@
     "npm:@bgotink/kdl@~0.4.1": "0.4.1",
     "npm:@biomejs/biome@*": "2.5.15",
     "npm:kdlfmt@~0.1.7": "0.1.7",
-    "npm:prometheus-query@^3.6.0": "3.6.0",
     "npm:zod@^4.6.7": "4.6.7"
   },
   "npm": {
@@ -293,12 +292,6 @@
         "minipass"
       ]
     },
-    "prometheus-query@3.6.0": {
-      "integrity": "sha512-KmQcDpHIzaQ9Vs5j/kqWj5sIX5v/DtLclQd7EolkuzWB0Saaue+ej7UkIVkBgKexcNeU4TydSloXs1Ca7Hcvig==",
-      "dependencies": [
-        "axios"
-      ]
-    },
     "proxy-from-env@2.1.0": {
       "integrity": "sha512-cJ+oHTW1VAEa8cJslgmUZrc+sjRKgAKl3Zyse6+PV38hZe/V6Z14TbCuXcan9F9ghlz4QrFr2c92TNF82UkYHA=="
     },
@@ -327,7 +320,6 @@
     "dependencies": [
       "npm:@bgotink/kdl@~0.4.1",
       "npm:kdlfmt@~0.1.7",
-      "npm:prometheus-query@^3.6.0",
       "npm:zod@^4.6.7"
     ]
   }

@@ -1,4 +1,5 @@
-prometheus url="http://10.0.0.1:9020" interval="1000"
+prometheus url="http://10.0.0.1:9020" interval="10000"
+server port=8000
 signal "head" {
     query "1 - avg by (instance) (rate(node_cpu_seconds_total{mode=\"idle\"}[5m]))"
 }
@@ -13,4 +14,7 @@ signal "skin" {
 }
 signal "belly" {
     query "1 - node_filesystem_avail_bytes{mountpoint=\"/\"} / node_filesystem_size_bytes{mountpoint=\"/\"}"
+}
+signal "visitor" {
+    query "sum by (instance) (node_logind_sessions{class=\"user\", remote=\"true\"}) > bool 0"
 }

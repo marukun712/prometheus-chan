@@ -2,7 +2,6 @@
 	"imports": {
 		"@bgotink/kdl": "npm:@bgotink/kdl@^0.4.1",
 		"kdlfmt": "npm:kdlfmt@^0.1.7",
-		"prometheus-query": "npm:prometheus-query@^3.6.0",
 		"zod": "npm:zod@^4.6.7"
 	},
 	"tasks": {
