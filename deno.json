@@ -8,6 +8,7 @@
 	"tasks": {
 		"check": "deno check && deno run -A npm:@biomejs/biome check --write ./",
 		"check:unsafe": "deno check && deno run -A npm:@biomejs/biome check --write --unsafe ./",
-		"fmt": "dx kdlfmt format static --kdl-version v1"
+		"fmt": "dx kdlfmt format static --kdl-version v1",
+		"dev": "deno --allow-read --allow-net --allow-env src/main.ts"
 	}
 }

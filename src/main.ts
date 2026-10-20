@@ -27,38 +27,33 @@ function getLevel(value: number, current: string): string {
 	return next;
 }
 
-function speak(
-	instance: string,
-	part: string | undefined,
-	from: string,
-	to: string,
-) {
+function say(part: string, from: string, to: string) {
 	for (const event of charConf.events) {
 		if (event.part !== part) continue;
 		if (event.to !== to) continue;
 		if (!event.from.includes("*") && !event.from.includes(from)) continue;
 
 		const line = event.says[Math.floor(Math.random() * event.says.length)];
-		const name = charConf.name.replace("{hostname}", instance);
-		console.log(`${name}「${line.text}」 ${line.voice}`);
-		return;
+		return { part, text: line.text };
 	}
+	return null;
 }
 
 async function tick() {
+	const result = new Map<string, string>();
 	for (const signal of metricConf.signals) {
 		const res = await prom.instantQuery(signal.query);
 		const r = res.result[0];
-		const instance = r.metric.labels.instance;
 
 		const before = state ?? "ok";
 		const after = getLevel(r.value.value, before);
 
-		if (before !== after) {
-			speak(instance, signal.part, before, after);
-		}
+		const text = say(signal.part, before, after);
 		state = after;
+		if (!text) return;
+		result.set(text.part, text.text);
 	}
+	console.log(result);
 }
 
 setInterval(async () => {
