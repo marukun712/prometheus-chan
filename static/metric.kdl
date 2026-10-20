@@ -1,0 +1,16 @@
+prometheus url="http://10.0.0.1:9020" interval="1000"
+signal "head" {
+    query "1 - avg by (instance) (rate(node_cpu_seconds_total{mode=\"idle\"}[5m]))"
+}
+signal "hands" {
+    query "1 - node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes"
+}
+signal "ears" {
+    query "max by (instance) (rate(node_network_receive_bytes_total{device!~\"lo|veth.*|docker.*|br-.*\"}[5m]) / node_network_speed_bytes)"
+}
+signal "skin" {
+    query "max by (instance) (node_hwmon_temp_celsius) / 100"
+}
+signal "belly" {
+    query "1 - node_filesystem_avail_bytes{mountpoint=\"/\"} / node_filesystem_size_bytes{mountpoint=\"/\"}"
+}
