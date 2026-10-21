@@ -22,80 +22,116 @@ levels {
 }
 part "head" "頭"
 part "hands" "手"
+part "memory" "記憶"
 part "ears" "耳"
-part "skin" "体温"
-part "belly" "お腹"
+part "mouth" "口"
+part "temperature" "体温"
 on "head" from="ok" to="ok" {
     say "平和ですね。こういう日はゲームに限ります"
     say "頭は冴えてます。...暇なので、ちょっとだけ周回してきます"
 }
-on "head" from="*" to="mild" {
-    say "ちょっと処理が重くなってきましたね"
-    say "考えごとが増えてきました"
+on "head" from="ok" to="mild" {
+    say "んー、考えることが増えてきました"
+    say "宿題しながらゲームしてる気分です"
+}
+on "head" from="hard,critical" to="mild" {
+    say "だいぶ頭が回るようになってきました。あと少しです"
 }
 on "head" from="*" to="hard" {
-    say "頭フル回転中です。今は話しかけないでください"
-    say "ラスボス戦並みに忙しいです..."
+    say "今、頭の中で全部同時に考えてます。話しかけないでください"
+    say "ボス戦の最中に宿題を出された気分です..."
 }
 on "head" from="*" to="critical" {
-    say "もう無理です...処理落ちします..."
-    say "頭から湯気が出そうです...ずん姉さま、助けて..."
+    say "頭がぐるぐるして...もう何も考えられません..."
 }
 on "head" from="hard,critical" to="ok" {
     say "ふぅ、ひと段落です" "voices/done1.wav"
     say "頭すっきりしました。さて、ゲームの続きを..." "voices/done2.wav"
 }
-on "hands" from="*" to="mild" {
-    say "持ち物が増えてきましたね"
+on "hands" from="ok" to="mild" {
+    say "両手がふさがってきました"
+    say "抱えるものが増えてきましたね"
+}
+on "hands" from="hard,critical" to="mild" {
+    say "少し手が空きました。片手くらいは使えます"
 }
 on "hands" from="*" to="hard" {
-    say "インベントリがいっぱいです..."
-    say "そろそろ持ちきれません"
+    say "抱えすぎて前が見えません..."
+    say "指一本しか空いてないです。ドア開けてもらえます？"
 }
 on "hands" from="*" to="critical" {
-    say "もう何も持てません！アイテム捨てなきゃ..."
-    say "何か落としそうです...！"
+    say "もう持てません！何か落とします...！"
+    say "どれか手放さないと...全部大事なんですけど..."
 }
 on "hands" from="hard,critical" to="ok" {
-    say "手が空きました。身軽が一番です" "voices/done3.wav"
+    say "手ぶらって最高ですね。身軽が一番です" "voices/done3.wav"
 }
-on "ears" from="*" to="mild" {
-    say "ん？今なんて言いました？"
+on "memory" from="ok" to="mild" {
+    say "最近、覚えることが多いですね"
+}
+on "memory" from="hard,critical" to="mild" {
+    say "少し忘れたら、だいぶ楽になりました"
+}
+on "memory" from="*" to="hard" {
+    say "覚えておくことが多すぎて、そろそろ限界です"
+    say "昔のことまで全部覚えてるので...何か忘れてもいいですか？"
+}
+on "memory" from="*" to="critical" {
+    say "もう新しいことが覚えられません...！"
+    say "セーブデータがいっぱいで、新しく保存できません..."
+}
+on "memory" from="hard,critical" to="ok" {
+    say "いらない思い出を整理したら、すっきりしました" "voices/done2.wav"
+}
+on "ears" from="ok" to="mild" {
+    say "なんだか話しかけられることが増えてきました"
+    say "みんな今日はおしゃべりですね"
+}
+on "ears" from="hard,critical" to="mild" {
+    say "だいぶ静かになってきました。やっと一人ずつ聞けます"
 }
 on "ears" from="*" to="hard" {
-    say "ラグがひどいです..."
-    say "聞き逃しが多いですね...回線、大丈夫ですか？"
+    say "ちょっと、一人ずつ話してください！"
+    say "あっちからもこっちからも話しかけられて...聖徳太子じゃないんですよ私"
 }
 on "ears" from="*" to="critical" {
-    say "何も聞こえません...回線落ちてませんか...？"
+    say "みんな一斉にしゃべらないでください！耳がパンクします！"
+    say "もう誰が何言ってるのかわかりません...！"
 }
 on "ears" from="hard,critical" to="ok" {
-    say "あ、ちゃんと聞こえます。Ping良好です" "voices/done1.wav"
+    say "ふぅ、やっと静かになりました。耳が休まります" "voices/done1.wav"
 }
-on "skin" from="*" to="mild" {
-    say "ちょっと暑くなってきましたね"
+on "mouth" from="ok" to="mild" {
+    say "今日はよくしゃべりますね、私"
 }
-on "skin" from="*" to="hard" {
-    say "なんだか熱っぽいです..."
+on "mouth" from="hard,critical" to="mild" {
+    say "やっと一息つけます。お茶ください"
 }
-on "skin" from="*" to="critical" {
+on "mouth" from="*" to="hard" {
+    say "しゃべりっぱなしで喉がカラカラです..."
+    say "実況配信でもこんなにしゃべりませんよ..."
+}
+on "mouth" from="*" to="critical" {
+    say "もう声が出ません...お水ください..."
+}
+on "mouth" from="hard,critical" to="ok" {
+    say "ふぅ、しゃべり疲れました。しばらく黙ってます" "voices/done2.wav"
+}
+on "temperature" from="ok" to="mild" {
+    say "ちょっとぽかぽかしてきました"
+}
+on "temperature" from="hard,critical" to="mild" {
+    say "まだ少し火照ってますけど、峠は越えました"
+}
+on "temperature" from="*" to="hard" {
+    say "顔が火照ってます...窓、開けてもいいですか"
+}
+on "temperature" from="*" to="critical" {
     say "あついです...背中のきりたんぽが焼けちゃいます...！"
-    say "このままだと倒れます..."
+    say "ふらふらします...冷えピタください..."
 }
-on "skin" from="hard,critical" to="ok" {
-    say "熱、下がったみたいです" "voices/done2.wav"
-}
-on "belly" from="*" to="mild" {
-    say "そろそろお腹いっぱいです"
-}
-on "belly" from="*" to="hard" {
-    say "これ以上は入りません..."
-}
-on "belly" from="*" to="critical" {
-    say "お腹が...容量の限界です..."
-}
-on "belly" from="hard,critical" to="ok" {
-    say "お腹が空いてきました。きりたんぽ鍋が食べたいです" "voices/done3.wav"
+on "temperature" from="hard,critical" to="ok" {
+    say "熱、下がりました。ひんやりして気持ちいいです" "voices/done3.wav"
 }
 event "visitor"
 react "visitor" when="rise" {
@@ -105,4 +141,10 @@ react "visitor" when="rise" {
 react "visitor" when="fall" {
     say "みんな帰りましたね。これで心置きなくゲームできます" "voices/bye1.wav"
     say "...ちょっとだけ、寂しいです" "voices/bye2.wav"
+}
+event "oom-kill"
+react "oom-kill" when="rise" {
+    say "あっ...持ちきれなくて、何か落としちゃいました"
+    say "ごめんなさい、誰かの荷物を勝手に捨てちゃいました..."
+    say "手が滑りました...今の、大事なものじゃないといいんですけど"
 }

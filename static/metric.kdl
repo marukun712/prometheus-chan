@@ -1,20 +1,26 @@
 prometheus url="http://10.0.0.1:9020" interval="10000"
 server port=8000
 signal "head" {
-    query "1 - avg by (instance) (rate(node_cpu_seconds_total{mode=\"idle\"}[5m]))"
+    query "1 - avg(rate(node_cpu_seconds_total{mode=\"idle\"}[5m]))"
 }
 signal "hands" {
-    query "1 - node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes"
+    query "max(1 - node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)"
+}
+signal "memory" {
+    query "max(1 - node_filesystem_avail_bytes{mountpoint=\"/\"} / node_filesystem_size_bytes{mountpoint=\"/\"})"
 }
 signal "ears" {
-    query "max by (instance) (rate(node_network_receive_bytes_total{device!~\"lo|veth.*|docker.*|br-.*\"}[5m]) / node_network_speed_bytes)"
+    query "clamp_max(max(rate(node_network_receive_bytes_total{device!~\"lo|veth.*|docker.*|br-.*\"}[5m]) / (node_network_speed_bytes > 0)), 1)"
 }
-signal "skin" {
-    query "max by (instance) (node_hwmon_temp_celsius) / 100"
+signal "mouth" {
+    query "clamp_max(max(rate(node_network_transmit_bytes_total{device!~\"lo|veth.*|docker.*|br-.*\"}[5m]) / (node_network_speed_bytes > 0)), 1)"
 }
-signal "belly" {
-    query "1 - node_filesystem_avail_bytes{mountpoint=\"/\"} / node_filesystem_size_bytes{mountpoint=\"/\"}"
+signal "temperature" {
+    query "clamp_max(max(node_hwmon_temp_celsius) / 100, 1)"
 }
 signal "visitor" {
-    query "sum by (instance) (node_logind_sessions{class=\"user\", remote=\"true\"}) > bool 0"
+    query "(sum(node_logind_sessions{class=\"user\", remote=\"true\"}) or vector(0)) > bool 0"
+}
+signal "oom-kill" {
+    query "(sum(increase(node_vmstat_oom_kill[1m])) or vector(0)) > bool 0"
 }

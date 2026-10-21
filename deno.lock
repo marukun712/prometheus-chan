@@ -3,6 +3,7 @@
   "specifiers": {
     "npm:@bgotink/kdl@~0.4.1": "0.4.1",
     "npm:@biomejs/biome@*": "2.5.15",
+    "npm:create-vite@latest": "9.3.1",
     "npm:kdlfmt@~0.1.7": "0.1.7",
     "npm:zod@^4.6.7": "4.6.7"
   },
@@ -118,6 +119,10 @@
       "dependencies": [
         "easy-table"
       ]
+    },
+    "create-vite@9.3.1": {
+      "integrity": "sha512-zHL0mgntkfUZLIsv29TWQfyAnW2+nUnmyX7rP2nG4xE4wtY3Vxov6lOtGTYUGUEWhEspWguuwDwLnHwDZ4BfCw==",
+      "bin": true
     },
     "debug@4.4.3": {
       "integrity": "sha512-RGwwWnwQvkVfavKVt22FGLw+xYSdzARwm0ru6DhTVA3umU5hZc28V3kO4stgYryrTlLpuvgI9GiijltAjNbcqA==",
