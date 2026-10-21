@@ -1,0 +1,108 @@
+character "tohoku-kiritan" {
+    name "東北きりたん"
+    first-person "私"
+}
+levels {
+    ok enter=0.0 {
+        voice "voices/normal1.wav"
+        voice "voices/normal2.wav"
+        voice "voices/normal3.wav"
+    }
+    mild enter=0.6 exit=0.5 {
+        voice "voices/tired1.wav"
+        voice "voices/tired2.wav"
+    }
+    hard enter=0.8 exit=0.7 {
+        voice "voices/tired3.wav"
+    }
+    critical enter=0.95 exit=0.9 {
+        voice "voices/tired4.wav"
+        voice "voices/tired5.wav"
+    }
+}
+part "head" "頭"
+part "hands" "手"
+part "ears" "耳"
+part "skin" "体温"
+part "belly" "お腹"
+on "head" from="ok" to="ok" {
+    say "平和ですね。こういう日はゲームに限ります"
+    say "頭は冴えてます。...暇なので、ちょっとだけ周回してきます"
+}
+on "head" from="*" to="mild" {
+    say "ちょっと処理が重くなってきましたね"
+    say "考えごとが増えてきました"
+}
+on "head" from="*" to="hard" {
+    say "頭フル回転中です。今は話しかけないでください"
+    say "ラスボス戦並みに忙しいです..."
+}
+on "head" from="*" to="critical" {
+    say "もう無理です...処理落ちします..."
+    say "頭から湯気が出そうです...ずん姉さま、助けて..."
+}
+on "head" from="hard,critical" to="ok" {
+    say "ふぅ、ひと段落です" "voices/done1.wav"
+    say "頭すっきりしました。さて、ゲームの続きを..." "voices/done2.wav"
+}
+on "hands" from="*" to="mild" {
+    say "持ち物が増えてきましたね"
+}
+on "hands" from="*" to="hard" {
+    say "インベントリがいっぱいです..."
+    say "そろそろ持ちきれません"
+}
+on "hands" from="*" to="critical" {
+    say "もう何も持てません！アイテム捨てなきゃ..."
+    say "何か落としそうです...！"
+}
+on "hands" from="hard,critical" to="ok" {
+    say "手が空きました。身軽が一番です" "voices/done3.wav"
+}
+on "ears" from="*" to="mild" {
+    say "ん？今なんて言いました？"
+}
+on "ears" from="*" to="hard" {
+    say "ラグがひどいです..."
+    say "聞き逃しが多いですね...回線、大丈夫ですか？"
+}
+on "ears" from="*" to="critical" {
+    say "何も聞こえません...回線落ちてませんか...？"
+}
+on "ears" from="hard,critical" to="ok" {
+    say "あ、ちゃんと聞こえます。Ping良好です" "voices/done1.wav"
+}
+on "skin" from="*" to="mild" {
+    say "ちょっと暑くなってきましたね"
+}
+on "skin" from="*" to="hard" {
+    say "なんだか熱っぽいです..."
+}
+on "skin" from="*" to="critical" {
+    say "あついです...背中のきりたんぽが焼けちゃいます...！"
+    say "このままだと倒れます..."
+}
+on "skin" from="hard,critical" to="ok" {
+    say "熱、下がったみたいです" "voices/done2.wav"
+}
+on "belly" from="*" to="mild" {
+    say "そろそろお腹いっぱいです"
+}
+on "belly" from="*" to="hard" {
+    say "これ以上は入りません..."
+}
+on "belly" from="*" to="critical" {
+    say "お腹が...容量の限界です..."
+}
+on "belly" from="hard,critical" to="ok" {
+    say "お腹が空いてきました。きりたんぽ鍋が食べたいです" "voices/done3.wav"
+}
+event "visitor"
+react "visitor" when="rise" {
+    say "あ、誰か来ました" "voices/hello1.wav"
+    say "いらっしゃいませ。...なんだ、ずん姉さまじゃないんですね" "voices/hello2.wav"
+}
+react "visitor" when="fall" {
+    say "みんな帰りましたね。これで心置きなくゲームできます" "voices/bye1.wav"
+    say "...ちょっとだけ、寂しいです" "voices/bye2.wav"
+}

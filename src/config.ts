@@ -15,6 +15,7 @@ export const Character = z.object({
 			name: z.string(),
 			enter: z.number(),
 			exit: z.number().optional(),
+			voices: z.array(z.string()),
 		}),
 	),
 	parts: z.array(
@@ -31,7 +32,7 @@ export const Character = z.object({
 			says: z.array(
 				z.object({
 					text: z.string(),
-					voice: z.string(),
+					voice: z.string().optional(),
 				}),
 			),
 		}),
@@ -44,7 +45,7 @@ export const Character = z.object({
 			says: z.array(
 				z.object({
 					text: z.string(),
-					voice: z.string(),
+					voice: z.string().optional(),
 				}),
 			),
 		}),
@@ -62,6 +63,7 @@ function readCharacter(doc: Document) {
 			name: n.getName(),
 			enter: n.getProperty("enter"),
 			exit: n.getProperty("exit"),
+			voices: n.children?.findNodesByName("voice").map((v) => arg(v)) ?? [],
 		})),
 		parts: doc.findNodesByName("part").map((n) => ({
 			id: arg(n, 0),
