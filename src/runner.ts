@@ -124,7 +124,6 @@ export class CharacterRunner {
 			const res = await query(signal.query, this.metricConf.prometheus.url);
 			if (res.data.resultType !== "vector") continue;
 			const sample = res.data.result[0]?.value;
-			console.log(signal, sample);
 
 			if (!sample) continue;
 			const value = Number(sample[1]);
@@ -146,14 +145,22 @@ export class CharacterRunner {
 		for (const [part, value] of this.eventState) {
 			events[part] = value;
 		}
-		return Response.json({ levels, events });
+		return Response.json(
+			{ levels, events },
+			{ headers: { "access-control-allow-origin": "*" } },
+		);
 	}
 
 	private handleVoice(): Response {
 		if (!this.currentVoice) return new Response("no voice", { status: 404 });
 		try {
 			const bytes = Deno.readFileSync(`./static/${this.currentVoice}`);
-			return new Response(bytes, { headers: { "content-type": "audio/wav" } });
+			return new Response(bytes, {
+				headers: {
+					"content-type": "audio/wav",
+					"access-control-allow-origin": "*",
+				},
+			});
 		} catch {
 			return new Response("not found", { status: 404 });
 		}
@@ -165,7 +172,7 @@ export class CharacterRunner {
 			start: (controller) => {
 				listener = (message) => {
 					controller.enqueue(
-						textEncoder.encode(`data: ${JSON.stringify(message)}\n`),
+						textEncoder.encode(`data: ${JSON.stringify(message)}\n\n`),
 					);
 				};
 				this.messageListeners.add(listener);
@@ -175,7 +182,10 @@ export class CharacterRunner {
 			},
 		});
 		return new Response(stream, {
-			headers: { "content-type": "text/event-stream" },
+			headers: {
+				"content-type": "text/event-stream",
+				"access-control-allow-origin": "*",
+			},
 		});
 	}
 

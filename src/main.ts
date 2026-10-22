@@ -1,9 +1,9 @@
-import { CharacterRunner } from "./character-runner.ts";
 import { loadCharacter, loadMetric } from "./config.ts";
+import { CharacterRunner } from "./runner.ts";
 
 const characters = [
 	{
-		character: loadCharacter("./static/kiritan/character.kdl"),
+		character: loadCharacter("./static/zunko/character.kdl"),
 		metric: loadMetric("./static/metric.kdl"),
 	},
 ];
