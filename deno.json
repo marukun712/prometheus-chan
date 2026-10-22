@@ -6,8 +6,10 @@
 	"imports": {
 		"@bgotink/kdl": "npm:@bgotink/kdl@^0.4.1",
 		"@kokoro/rig": "jsr:@kokoro/rig@^0.10.0",
+		"gsap": "npm:gsap@^3.15.0",
 		"kdlfmt": "npm:kdlfmt@^0.1.7",
 		"pixi-viewport": "npm:pixi-viewport@^6.0.3",
+		"pixi.js": "npm:pixi.js@^8.18.1",
 		"zod": "npm:zod@^4.6.7"
 	},
 	"tasks": {

@@ -16,7 +16,7 @@
     "npm:@bgotink/kdl@~0.4.1": "0.4.1",
     "npm:@biomejs/biome@*": "2.5.15",
     "npm:ag-psd@^30.1.1": "30.2.0",
-    "npm:create-vite@latest": "9.3.1",
+    "npm:gsap@^3.15.0": "3.15.0",
     "npm:kdlfmt@~0.1.7": "0.1.7",
     "npm:pixi-viewport@^6.0.3": "6.0.3_pixi.js@8.22.0",
     "npm:pixi.js@^8.18.1": "8.22.0",
@@ -219,10 +219,6 @@
         "easy-table"
       ]
     },
-    "create-vite@9.3.1": {
-      "integrity": "sha512-zHL0mgntkfUZLIsv29TWQfyAnW2+nUnmyX7rP2nG4xE4wtY3Vxov6lOtGTYUGUEWhEspWguuwDwLnHwDZ4BfCw==",
-      "bin": true
-    },
     "debug@4.4.3": {
       "integrity": "sha512-RGwwWnwQvkVfavKVt22FGLw+xYSdzARwm0ru6DhTVA3umU5hZc28V3kO4stgYryrTlLpuvgI9GiijltAjNbcqA==",
       "dependencies": [
@@ -336,6 +332,9 @@
     },
     "gopd@1.2.0": {
       "integrity": "sha512-ZUKRh6/kUFoAiTAtTYPZJ3hw9wNxx+BIBOijnlG9PnrJsCcSjs1wyyD6vJpaYtgnzDrKYRSqf3OO6Rfa93xsRg=="
+    },
+    "gsap@3.15.0": {
+      "integrity": "sha512-dMW4CWBTUK1AEEDeZc1g4xpPGIrSf9fJF960qbTZmN/QwZIWY5wgliS6JWl9/25fpTGJrMRtSjGtOmPnfjZB+A=="
     },
     "has-symbols@1.1.0": {
       "integrity": "sha512-1cDNdwJ2Jaohmb3sg4OmKaMBwuC48sYni5HUw2DvsC8LjGTLK9h+eb1X6RyuOHe4hT0ULCW68iomhjUoKUqlPQ=="
@@ -472,8 +471,10 @@
     "dependencies": [
       "jsr:@kokoro/rig@0.10",
       "npm:@bgotink/kdl@~0.4.1",
+      "npm:gsap@^3.15.0",
       "npm:kdlfmt@~0.1.7",
       "npm:pixi-viewport@^6.0.3",
+      "npm:pixi.js@^8.18.1",
       "npm:zod@^4.6.7"
     ]
   }

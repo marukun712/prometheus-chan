@@ -1,20 +1,38 @@
 import {
-	type Animation,
-	curve,
 	drawPNG,
 	getMeshPosition,
-	loop,
+	lerpPose,
 	type Pose,
 	Rig,
-	seq,
 	setupCanvas,
 } from "@kokoro/rig";
+import { extractDepth, injectDepthToPose, uvToDepth } from "@kokoro/rig/depth";
+import gsap from "gsap";
+import * as PIXI from "pixi.js";
 import { Viewport } from "pixi-viewport";
 import { z } from "zod";
 
-const API_BASE = new URL("http://localhost:3000");
-
 type Level = "ok" | "hard" | "critical";
+
+type Tier = {
+	breathAmount: number;
+	breathDuration: number;
+	lookAmount: number;
+	lookDuration: number;
+};
+
+type AnimState = {
+	depth: { lift: Pose; neutral: Pose; left: Pose; right: Pose };
+	t: { breath: number; look: number };
+};
+
+type Bubble = {
+	container: PIXI.Container;
+	background: PIXI.Graphics;
+	text: PIXI.Text;
+};
+
+const API_BASE = new URL("http://localhost:3000");
 
 const LEVEL_ORDER: Level[] = ["ok", "hard", "critical"];
 
@@ -28,30 +46,29 @@ const IMAGE_FOR_LEVEL: Record<Level, string> = {
 	critical: "./images/critical.png",
 };
 
-type Tier = {
-	breathAmount: number;
-	breathDuration: number;
-	lookAmount: number;
-	lookDuration: number;
+const DEPTH_IMAGE_FOR_LEVEL: Record<Level, string> = {
+	ok: "./images/normal_depth.png",
+	hard: "./images/hard_depth.png",
+	critical: "./images/critical_depth.png",
 };
 
 const TIER: Record<Level, Tier> = {
 	ok: {
-		breathAmount: 6,
+		breathAmount: 8,
 		breathDuration: 2.4,
-		lookAmount: 0.05,
+		lookAmount: 12,
 		lookDuration: 6,
 	},
 	hard: {
-		breathAmount: 10,
+		breathAmount: 12,
 		breathDuration: 3.6,
-		lookAmount: 0.025,
+		lookAmount: 8,
 		lookDuration: 10,
 	},
 	critical: {
-		breathAmount: 14,
-		breathDuration: 5,
-		lookAmount: 0.01,
+		breathAmount: 16,
+		breathDuration: 4.8,
+		lookAmount: 4,
 		lookDuration: 16,
 	},
 };
@@ -80,49 +97,142 @@ function worstLevel(levels: Record<string, string>): Level {
 const NEUTRAL: Pose = () => ({ tx: 0, ty: 0 });
 
 function liftPose(amount: number): Pose {
-	return (u, v) => {
+	return (u: number, v: number) => {
 		const { fromTop } = getMeshPosition(u, v);
-		return { tx: 0, ty: -amount * curve.power2(fromTop) };
+		return { tx: 0, ty: -amount * Math.sin(fromTop * Math.PI) };
 	};
 }
 
-function breathAnimation(tier: Tier): Animation {
-	const half = tier.breathDuration / 2;
-	return loop(
-		seq([
-			{ duration: half, pose: liftPose(tier.breathAmount), ease: curve.power2 },
-			{ duration: half, pose: NEUTRAL, ease: curve.power2 },
-		]),
-		tier.breathDuration,
+function sidePose(amount: number): Pose {
+	return () => ({ tx: amount, ty: 0 });
+}
+
+function createAnimState(
+	tier: Tier,
+	depthFunc: (u: number, v: number) => number,
+): AnimState {
+	const depth = injectDepthToPose(
+		{
+			lift: liftPose(tier.breathAmount * 2),
+			neutral: NEUTRAL,
+			left: sidePose(-tier.lookAmount),
+			right: sidePose(tier.lookAmount),
+		},
+		depthFunc,
 	);
+
+	const breath = { amount: 0 };
+	gsap.to(breath, {
+		amount: 1,
+		duration: tier.breathDuration / 2,
+		ease: "sine.inOut",
+		repeat: -1,
+		yoyo: true,
+	});
+
+	const look = { amount: 0 };
+	gsap.to(look, {
+		amount: 1,
+		duration: tier.lookDuration / 2,
+		ease: "sine.inOut",
+		repeat: -1,
+		yoyo: true,
+	});
+
+	return {
+		depth: {
+			lift: depth.lift,
+			neutral: depth.neutral,
+			left: depth.left,
+			right: depth.right,
+		},
+		t: {
+			get breath() {
+				return breath.amount;
+			},
+			get look() {
+				return look.amount;
+			},
+		},
+	};
 }
 
-function lookAroundPose(t: number, tier: Tier): Pose {
-	const angle =
-		Math.sin((2 * Math.PI * t) / tier.lookDuration) * tier.lookAmount;
-	return () => ({ tx: 0, ty: 0, rot: angle, pivot: { u: 0.5, v: 1.0 } });
-}
-
-async function loadCharacterImage(url: string) {
+async function loadCharacterImage(
+	url: string,
+	depthUrl: string,
+	renderer: PIXI.Renderer,
+) {
 	const nodes = await drawPNG(url);
 	const rig = new Rig(nodes);
-	return { container: nodes[0].container, rig };
+
+	const depthNodes = await drawPNG(depthUrl);
+	const { data, width, height } = extractDepth(
+		depthNodes[0].container,
+		renderer,
+	);
+	const depthFunc = uvToDepth(data, width, height);
+
+	return { container: nodes[0].container, rig, depthFunc };
+}
+
+function createBubble(): Bubble {
+	const text = new PIXI.Text({
+		text: "",
+		style: {
+			fontSize: 80,
+			fill: 0x000000,
+			wordWrap: true,
+			wordWrapWidth: 800,
+			align: "center",
+		},
+	});
+	text.anchor.set(0.5);
+
+	const background = new PIXI.Graphics();
+
+	const container = new PIXI.Container();
+	container.addChild(background);
+	container.addChild(text);
+	container.visible = false;
+
+	return { container, background, text };
+}
+
+function setBubbleText(bubble: Bubble, value: string) {
+	bubble.text.text = value;
+
+	const width = bubble.text.width + 24;
+	const height = bubble.text.height + 24;
+	bubble.background
+		.clear()
+		.roundRect(0, 0, width, height, 16)
+		.fill(0xffffff)
+		.stroke({ width: 6, color: 0x00000 });
+
+	bubble.text.x = width / 2;
+	bubble.text.y = height / 2;
+}
+
+function positionBubble(
+	bubble: Bubble,
+	character: { container: PIXI.Container; rig: Rig },
+) {
+	bubble.container.x =
+		character.container.x + character.rig.minX + character.rig.w;
+	bubble.container.y =
+		character.container.y + character.rig.minY - bubble.container.height;
 }
 
 let bubbleHideTimer: ReturnType<typeof setTimeout> | undefined;
 
-function showBubble(text: string) {
-	const bubble = document.getElementById("bubble");
-	const bubbleText = document.getElementById("bubble-text");
-	if (!bubble || !bubbleText) return;
-
-	bubbleText.textContent = text;
-	bubble.hidden = false;
+function showBubble(bubble: Bubble, text: string) {
+	setBubbleText(bubble, text);
+	bubble.container.visible = true;
 
 	clearTimeout(bubbleHideTimer);
 	bubbleHideTimer = setTimeout(() => {
-		bubble.hidden = true;
-	}, 6000);
+		bubble.container.visible = false;
+	}, 24000);
 }
 
 const voicePlayer = new Audio();
@@ -186,11 +296,17 @@ async function main() {
 		Level,
 		Awaited<ReturnType<typeof loadCharacterImage>>
 	>();
+	const animations = new Map<Level, AnimState>();
 	for (const level of LEVEL_ORDER) {
-		const character = await loadCharacterImage(IMAGE_FOR_LEVEL[level]);
+		const character = await loadCharacterImage(
+			IMAGE_FOR_LEVEL[level],
+			DEPTH_IMAGE_FOR_LEVEL[level],
+			app.renderer,
+		);
 		character.container.visible = false;
 		viewport.addChild(character.container);
 		characters.set(level, character);
+		animations.set(level, createAnimState(TIER[level], character.depthFunc));
 	}
 
 	let currentLevel: Level = LEVEL_ORDER[0];
@@ -206,18 +322,26 @@ async function main() {
 		currentLevel = level;
 	}
 
+	const bubble = createBubble();
+	viewport.addChild(bubble.container);
+	showBubble(bubble, "お疲れ様です！");
+
 	app.ticker.add(() => {
 		const character = characters.get(currentLevel);
-		if (!character) return;
+		const anim = animations.get(currentLevel);
+		if (!character || !anim) return;
 
-		const t = app.ticker.lastTime / 1000;
-		const tier = TIER[currentLevel];
-		character.rig.apply([...breathAnimation(tier)(t), lookAroundPose(t, tier)]);
+		character.rig.apply([
+			lerpPose(anim.depth.neutral, anim.depth.lift, anim.t.breath),
+			lerpPose(anim.depth.left, anim.depth.right, anim.t.look),
+		]);
+
+		positionBubble(bubble, character);
 	});
 
 	pollState(setLevel);
 	listenMessages((text) => {
-		showBubble(text);
+		showBubble(bubble, text);
 		playVoice();
 	});
 }
