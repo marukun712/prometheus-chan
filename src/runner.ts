@@ -4,6 +4,7 @@ import { query } from "./prometheus.ts";
 type Message = {
 	part: string;
 	text: string;
+	voice?: string;
 	time: number;
 };
 
@@ -14,7 +15,6 @@ export class CharacterRunner {
 	private metricConf: Metric;
 	private levelState = new Map<string, string>();
 	private eventState = new Map<string, number>();
-	private currentVoice: string | undefined;
 	private messageListeners = new Set<(message: Message) => void>();
 
 	constructor(charConf: Character, metricConf: Metric) {
@@ -23,8 +23,7 @@ export class CharacterRunner {
 	}
 
 	private publish(part: string, text: string, voice: string | undefined) {
-		this.currentVoice = voice;
-		const message: Message = { part, text, time: Date.now() };
+		const message: Message = { part, text, voice, time: Date.now() };
 		for (const listener of this.messageListeners) {
 			listener(message);
 		}
@@ -151,11 +150,15 @@ export class CharacterRunner {
 		);
 	}
 
-	private handleVoice(): Response {
-		if (!this.currentVoice) return new Response("no voice", { status: 404 });
+	private handleStatic(pathname: string): Response {
+		const relative = pathname.slice("/static/".length);
 		try {
-			const bytes = Deno.readFileSync(`./static/${this.currentVoice}`);
-			return new Response(bytes, {
+			const root = Deno.realPathSync("./static");
+			const path = Deno.realPathSync(`./static/${relative}`);
+			if (!path.startsWith(root)) {
+				return new Response("not found", { status: 404 });
+			}
+			return new Response(Deno.readFileSync(path), {
 				headers: {
 					"content-type": "audio/wav",
 					"access-control-allow-origin": "*",
@@ -202,7 +205,9 @@ export class CharacterRunner {
 			const url = new URL(req.url);
 			if (url.pathname === "/state") return this.handleState();
 			if (url.pathname === "/messages") return this.handleMessages();
-			if (url.pathname === "/voice") return this.handleVoice();
+			if (url.pathname.startsWith("/static/")) {
+				return this.handleStatic(url.pathname);
+			}
 			return new Response("not found", { status: 404 });
 		});
 	}

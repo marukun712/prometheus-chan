@@ -5,7 +5,6 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>prometheus-chan</title>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css" />
   <style>
     html,
     body {
@@ -17,11 +16,81 @@
     canvas {
       display: block;
     }
+
+    #chat {
+      position: fixed;
+      right: 20px;
+      bottom: 20px;
+      width: 320px;
+      max-height: 50vh;
+      display: flex;
+      flex-direction: column;
+      box-sizing: border-box;
+      padding: 14px;
+      border: 2px solid #f0c4d2;
+      border-radius: 18px;
+      background-color: #fffafb;
+      box-shadow: 0 6px 20px rgba(190, 140, 160, 0.25);
+      font-family: system-ui, sans-serif;
+      color: #5a4a51;
+    }
+
+    #chat-title {
+      margin: 0 0 10px;
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      color: #c9798f;
+    }
+
+    #chat-log {
+      margin: 0;
+      padding: 0;
+      list-style: none;
+      overflow-y: auto;
+    }
+
+    #chat-log li {
+      padding: 9px 13px;
+      border: 1px solid #f6dde4;
+      border-radius: 14px 14px 14px 4px;
+      background-color: #ffffff;
+      font-size: 14px;
+      line-height: 1.6;
+      animation: pop-in 0.25s ease-out;
+    }
+
+    #chat-log li + li {
+      margin-top: 8px;
+    }
+
+    #chat-log time {
+      display: block;
+      margin-top: 4px;
+      font-size: 11px;
+      color: #bda0aa;
+    }
+
+    @keyframes pop-in {
+      from {
+        opacity: 0;
+        transform: translateY(6px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
   </style>
 </head>
 
 <body>
   <div id="stage"></div>
+  <div id="chat">
+    <p id="chat-title">メッセージ</p>
+    <ul id="chat-log"></ul>
+  </div>
   <script type="module" src="./main.ts"></script>
 </body>
 

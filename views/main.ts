@@ -8,7 +8,7 @@ import {
 } from "@kokoro/rig";
 import { extractDepth, injectDepthToPose, uvToDepth } from "@kokoro/rig/depth";
 import gsap from "gsap";
-import * as PIXI from "pixi.js";
+import type * as PIXI from "pixi.js";
 import { Viewport } from "pixi-viewport";
 import { z } from "zod";
 
@@ -24,12 +24,6 @@ type Tier = {
 type AnimState = {
 	depth: { lift: Pose; neutral: Pose; left: Pose; right: Pose };
 	t: { breath: number; look: number };
-};
-
-type Bubble = {
-	container: PIXI.Container;
-	background: PIXI.Graphics;
-	text: PIXI.Text;
 };
 
 const API_BASE = new URL("http://localhost:3000");
@@ -81,8 +75,10 @@ const State = z.object({
 const Message = z.object({
 	part: z.string(),
 	text: z.string(),
+	voice: z.string().optional(),
 	time: z.number(),
 });
+type Message = z.infer<typeof Message>;
 
 // 一番状態が悪いパーツのレベルを取得する
 function worstLevel(levels: Record<string, string>): Level {
@@ -175,73 +171,11 @@ async function loadCharacterImage(
 	return { container: nodes[0].container, rig, depthFunc };
 }
 
-function createBubble(): Bubble {
-	const text = new PIXI.Text({
-		text: "",
-		style: {
-			fontSize: 80,
-			fill: 0x000000,
-			wordWrap: true,
-			wordWrapWidth: 800,
-			align: "center",
-		},
-	});
-	text.anchor.set(0.5);
-
-	const background = new PIXI.Graphics();
-
-	const container = new PIXI.Container();
-	container.addChild(background);
-	container.addChild(text);
-	container.visible = false;
-
-	return { container, background, text };
-}
-
-function setBubbleText(bubble: Bubble, value: string) {
-	bubble.text.text = value;
-
-	const width = bubble.text.width + 24;
-	const height = bubble.text.height + 24;
-	bubble.background
-		.clear()
-		.roundRect(0, 0, width, height, 16)
-		.fill(0xffffff)
-		.stroke({ width: 6, color: 0x00000 });
-
-	bubble.text.x = width / 2;
-	bubble.text.y = height / 2;
-}
-
-function positionBubble(
-	bubble: Bubble,
-	character: { container: PIXI.Container; rig: Rig },
-) {
-	bubble.container.x =
-		character.container.x + character.rig.minX + character.rig.w;
-	bubble.container.y =
-		character.container.y + character.rig.minY - bubble.container.height;
-}
-
-let bubbleHideTimer: ReturnType<typeof setTimeout> | undefined;
-
-function showBubble(bubble: Bubble, text: string) {
-	setBubbleText(bubble, text);
-	bubble.container.visible = true;
-
-	clearTimeout(bubbleHideTimer);
-	bubbleHideTimer = setTimeout(() => {
-		bubble.container.visible = false;
-	}, 24000);
-}
-
 const voicePlayer = new Audio();
 
-async function playVoice() {
+async function playVoice(voice: string) {
 	try {
-		const voiceUrl = new URL("/voice", API_BASE);
-		voiceUrl.searchParams.set("t", String(Date.now()));
-		const res = await fetch(voiceUrl);
+		const res = await fetch(new URL(`/static/${voice}`, API_BASE));
 		if (!res.ok) return;
 		const blob = await res.blob();
 		voicePlayer.src = URL.createObjectURL(blob);
@@ -251,12 +185,26 @@ async function playVoice() {
 	}
 }
 
-function listenMessages(onMessage: (text: string) => void) {
+function listenMessages(onMessage: (message: Message) => void) {
 	const source = new EventSource(new URL("/messages", API_BASE).toString());
 	source.onmessage = (ev) => {
-		const message = Message.parse(JSON.parse(ev.data));
-		onMessage(message.text);
+		onMessage(Message.parse(JSON.parse(ev.data)));
 	};
+}
+
+function appendChatMessage(log: HTMLElement, message: Message) {
+	const item = document.createElement("li");
+	item.textContent = message.text;
+
+	const time = document.createElement("time");
+	time.textContent = new Date(message.time).toLocaleTimeString("ja-JP", {
+		hour: "2-digit",
+		minute: "2-digit",
+	});
+	item.appendChild(time);
+
+	log.appendChild(item);
+	log.scrollTop = log.scrollHeight;
 }
 
 function pollState(onLevel: (level: Level) => void) {
@@ -278,6 +226,9 @@ function pollState(onLevel: (level: Level) => void) {
 async function main() {
 	const stage = document.getElementById("stage");
 	if (!stage) return;
+
+	const chatLog = document.getElementById("chat-log");
+	if (!chatLog) return;
 
 	const app = await setupCanvas(stage);
 
@@ -322,10 +273,6 @@ async function main() {
 		currentLevel = level;
 	}
 
-	const bubble = createBubble();
-	viewport.addChild(bubble.container);
-	showBubble(bubble, "お疲れ様です！");
-
 	app.ticker.add(() => {
 		const character = characters.get(currentLevel);
 		const anim = animations.get(currentLevel);
@@ -335,14 +282,12 @@ async function main() {
 			lerpPose(anim.depth.neutral, anim.depth.lift, anim.t.breath),
 			lerpPose(anim.depth.left, anim.depth.right, anim.t.look),
 		]);
-
-		positionBubble(bubble, character);
 	});
 
 	pollState(setLevel);
-	listenMessages((text) => {
-		showBubble(bubble, text);
-		playVoice();
+	listenMessages((message) => {
+		appendChatMessage(chatLog, message);
+		if (message.voice) playVoice(message.voice);
 	});
 }
 
