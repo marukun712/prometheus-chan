@@ -1,13 +1,7 @@
 import { loadCharacter, loadMetric } from "./config.ts";
 import { CharacterRunner } from "./runner.ts";
 
-const characters = [
-	{
-		character: loadCharacter("./static/character/zunko/ix2215.kdl"),
-		metric: loadMetric("./static/metrics/ix2215.kdl"),
-	},
-];
+const character = loadCharacter(`./static/character/${Deno.args[0]}`);
+const metric = loadMetric(`./static/metrics/${Deno.args[1]}`);
 
-for (const { character, metric } of characters) {
-	new CharacterRunner(character, metric).start();
-}
+new CharacterRunner(character, metric).start();
