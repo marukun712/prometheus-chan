@@ -124,6 +124,8 @@ export class CharacterRunner {
 			if (res.data.resultType !== "vector") continue;
 			const sample = res.data.result[0]?.value;
 
+			console.log(signal, sample);
+
 			if (!sample) continue;
 			const value = Number(sample[1]);
 

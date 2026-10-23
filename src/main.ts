@@ -3,8 +3,8 @@ import { CharacterRunner } from "./runner.ts";
 
 const characters = [
 	{
-		character: loadCharacter("./static/zunko/character.kdl"),
-		metric: loadMetric("./static/metric.kdl"),
+		character: loadCharacter("./static/character/zunko/ix2215.kdl"),
+		metric: loadMetric("./static/metrics/ix2215.kdl"),
 	},
 ];
 

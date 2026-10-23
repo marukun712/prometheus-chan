@@ -1,0 +1,44 @@
+prometheus url="http://10.0.0.1:9020" interval="10000"
+server port=3000
+signal "wan-rx" {
+    query "rate(ifHCInOctets{ifDescr=\"GigaEthernet0\"}[5m]) * 8 / (ifHighSpeed{ifDescr=\"GigaEthernet0\"} * 1e6)"
+}
+signal "wan-tx" {
+    query "rate(ifHCOutOctets{ifDescr=\"GigaEthernet0\"}[5m]) * 8 / (ifHighSpeed{ifDescr=\"GigaEthernet0\"} * 1e6)"
+}
+signal "wan-link" {
+    query "ifOperStatus{ifDescr=\"GigaEthernet0\"} != bool 1"
+}
+signal "home-rx" {
+    query "rate(ifHCInOctets{ifDescr=\"GigaEthernet2:1.0\"}[5m]) * 8 / (ifHighSpeed{ifDescr=\"GigaEthernet2:1.0\"} * 1e6)"
+}
+signal "home-tx" {
+    query "rate(ifHCOutOctets{ifDescr=\"GigaEthernet2:1.0\"}[5m]) * 8 / (ifHighSpeed{ifDescr=\"GigaEthernet2:1.0\"} * 1e6)"
+}
+signal "home-link" {
+    query "ifOperStatus{ifDescr=\"GigaEthernet2:1.0\"} != bool 1"
+}
+signal "server-rx" {
+    query "rate(ifHCInOctets{ifDescr=\"GigaEthernet2:2.0\"}[5m]) * 8 / (ifHighSpeed{ifDescr=\"GigaEthernet2:2.0\"} * 1e6)"
+}
+signal "server-tx" {
+    query "rate(ifHCOutOctets{ifDescr=\"GigaEthernet2:2.0\"}[5m]) * 8 / (ifHighSpeed{ifDescr=\"GigaEthernet2:2.0\"} * 1e6)"
+}
+signal "server-link" {
+    query "ifOperStatus{ifDescr=\"GigaEthernet2:2.0\"} != bool 1"
+}
+signal "head" {
+    query "picoSchedRtUtl1Min / 100"
+}
+signal "desk" {
+    query "picoHeapUtil / 100"
+}
+signal "temp" {
+    query "picoCelsius / 100"
+}
+signal "wan-rx-spike" {
+    query "((rate(ifHCInOctets{ifDescr=\"GigaEthernet0\"}[5m]) > bool 3 * avg_over_time(rate(ifHCInOctets{ifDescr=\"GigaEthernet0\"}[5m])[1h:1m] offset 5m)) * (rate(ifHCInOctets{ifDescr=\"GigaEthernet0\"}[5m]) * 8 > bool 1e7)) or vector(0)"
+}
+signal "wan-tx-spike" {
+    query "((rate(ifHCOutOctets{ifDescr=\"GigaEthernet0\"}[5m]) > bool 3 * avg_over_time(rate(ifHCOutOctets{ifDescr=\"GigaEthernet0\"}[5m])[1h:1m] offset 5m)) * (rate(ifHCOutOctets{ifDescr=\"GigaEthernet0\"}[5m]) * 8 > bool 1e7)) or vector(0)"
+}
