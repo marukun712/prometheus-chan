@@ -1,0 +1,202 @@
+character "tohoku-kiritan" {
+    name "東北きりたん"
+}
+levels {
+    ok enter=0.0 {
+        label "ふつう"
+        color "#4a8f6f"
+        voice "voices/filler/yoshi.wav"
+        voice "voices/filler/ehehe.wav"
+        voice "voices/greeting/hai.wav"
+        image "images/default.png"
+    }
+    hard enter=0.6 exit=0.5 {
+        label "すこし疲れています"
+        color "#c88a2e"
+        voice "voices/negative/haa.wav"
+        voice "voices/neutral/mou.wav"
+        voice "voices/groan/u_small.wav"
+        image "images/default.png"
+    }
+    critical enter=0.95 exit=0.9 {
+        label "もう限界です"
+        color "#c2453c"
+        voice "voices/negative/aa_mou.wav"
+        voice "voices/negative/muri_desu.wav"
+        voice "voices/groan/uuu.wav"
+        image "images/default.png"
+    }
+}
+part "head" "頭"
+part "hands" "手"
+part "memory" "記憶"
+part "ears" "耳"
+part "mouth" "口"
+part "temperature" "体温"
+on "head" from="ok" to="hard" {
+    say line="ええっと...考えることが増えてきました" voice="voices/filler/eetto.wav"
+    say line="はあ...また考えごとが増えました" voice="voices/negative/haa.wav"
+}
+on "head" from="critical" to="hard" {
+    say line="よしっ。だいぶ頭が回るようになってきました。あと少しです" voice="voices/filler/yoshi.wav"
+}
+on "head" from="*" to="critical" {
+    say line="無理です。頭がぐるぐるして、もう何も考えられません" voice="voices/negative/muri_desu.wav"
+    say line="疲れました...。今日の会話量、上限オーバーです..." voice="voices/game/tsukaremashita.wav"
+}
+on "head" from="hard,critical" to="ok" {
+    say line="うまくいきましたね。このくらいがちょうどいいんです" voice="voices/game/umaku_ikimashita.wav"
+}
+on "hands" from="ok" to="hard" {
+    say line="あのですね、両手がふさがってきました" voice="voices/filler/ano_desune.wav"
+}
+on "hands" from="critical" to="hard" {
+    say line="よしっ。少し手が空きました。片手くらいは使えます" voice="voices/filler/yoshi.wav"
+}
+on "hands" from="*" to="critical" {
+    say line="あぁっ！もう持てません。何か落としちゃいます" voice="voices/groan/aa.wav"
+    say line="だめです。これ以上は抱えられません" voice="voices/negative/dame_desu.wav"
+}
+on "hands" from="hard,critical" to="ok" {
+    say line="やりました！手が空きました。身軽になりましたね" voice="voices/positive/yarimashita.wav"
+}
+on "memory" from="ok" to="hard" {
+    say line="もう...覚えることが多いですね" voice="voices/neutral/mou.wav"
+}
+on "memory" from="critical" to="hard" {
+    say line="そうそう。少し忘れたら、だいぶ楽になりました" voice="voices/filler/sousou.wav"
+}
+on "memory" from="*" to="critical" {
+    say line="ガーン。もう新しいことは覚えられません" voice="voices/negative/gaan.wav"
+    say line="無理です。これ以上は入りません" voice="voices/negative/muri_desu.wav"
+}
+on "memory" from="hard,critical" to="ok" {
+    say line="大成功です！これはずんねえさまに褒められちゃいますね...！" voice="voices/game/daiseikou.wav"
+}
+on "ears" from="ok" to="hard" {
+    say line="なにしてるんです？話しかけられることが増えてきました" voice="voices/filler/nani_shiterundesu.wav"
+}
+on "ears" from="critical" to="hard" {
+    say line="ふーん。だいぶ静かになってきました。やっと一人ずつ聞けます" voice="voices/filler/fuun.wav"
+}
+on "ears" from="*" to="critical" {
+    say line="ばかばか！みんな一斉にしゃべらないでください。耳がパンクします" voice="voices/neutral/bakabaka.wav"
+    say line="アホですか！一度にそんなに話されても、聞き取れません" voice="voices/negative/aho_desuka.wav"
+}
+on "ears" from="hard,critical" to="ok" {
+    say line="おつかれさまです。やっと静かになりました" voice="voices/greeting/otsukaresama.wav"
+}
+on "mouth" from="ok" to="hard" {
+    say line="ぅっ...しゃべりすぎて、喉がカラカラです" voice="voices/groan/u_small.wav"
+}
+on "mouth" from="critical" to="hard" {
+    say line="はい。やっと一息つけます" voice="voices/greeting/hai.wav"
+}
+on "mouth" from="*" to="critical" {
+    say line="ううう...もう声が出ません。お水ください" voice="voices/groan/uuu.wav"
+}
+on "mouth" from="hard,critical" to="ok" {
+    say line="それでは。しゃべり疲れたので、しばらく静かにしてますね" voice="voices/greeting/soredewa.wav"
+}
+on "temperature" from="ok" to="hard" {
+    say line="うー。ちょっとぽかぽかしてきました" voice="voices/song/uu.wav"
+}
+on "temperature" from="critical" to="hard" {
+    say line="んっ。まだ少し火照ってますけど、峠は越えました" voice="voices/groan/n.wav"
+}
+on "temperature" from="*" to="critical" {
+    say line="あー、もう！ふらふらします。何か冷たいものをください" voice="voices/negative/aa_mou.wav"
+    say line="ひっ。あつすぎます。もう限界です" voice="voices/groan/hi.wav"
+}
+on "temperature" from="hard,critical" to="ok" {
+    say line="好きです。このひんやりした感じ、落ち着きます" voice="voices/positive/suki_desu.wav"
+}
+event "visitor"
+react "visitor" when="rise" {
+    say line="こんにちは" voice="voices/greeting/konnichiwa.wav"
+    say line="こんばんは" voice="voices/greeting/konbanwa.wav"
+    say line="おかえりなさい" voice="voices/greeting/okaerinasai.wav"
+    say line="...つっついても何も出ませんよ" voice="voices/touch/tsuttsuite.wav"
+}
+react "visitor" when="fall" {
+    say line="いってらっしゃい" voice="voices/greeting/itterasshai.wav"
+    say line="さようなら..." voice="voices/greeting/sayounara_lonely.wav"
+    say line="へばな。" voice="voices/dialect/hebana.wav"
+}
+event "oom-kill"
+react "oom-kill" when="rise" {
+    say line="うわぁ...持ちきれなくて、何か落としちゃいました" voice="voices/negative/uwaa.wav"
+    say line="ぁっ。すみません、取り落としました" voice="voices/groan/a_small.wav"
+}
+ask "head" level="ok" {
+    say line="ま、わたしが本気を出せば、こんなもんですね" voice="voices/game/honki.wav"
+}
+ask "head" level="hard" {
+    say line="そうです。いま考えることが多くて、少し忙しいです" voice="voices/greeting/sou_desu.wav"
+}
+ask "head" level="critical" {
+    say line="ごめんなさい。今は頭がいっぱいで...後にしてもらえますか" voice="voices/greeting/gomennasai.wav"
+}
+ask "hands" level="ok" {
+    say line="やりまーす。両手はまだ空いてます。何か持ちましょうか" voice="voices/positive/yarimasu.wav"
+}
+ask "hands" level="hard" {
+    say line="はい。だいぶ抱えてますけど、まだ平気です" voice="voices/greeting/hai.wav"
+}
+ask "hands" level="critical" {
+    say line="ぅっ...手がふさがってて、動けないです" voice="voices/groan/u_small.wav"
+}
+ask "memory" level="ok" {
+    say line="がんばります！まだいろんな物を覚えられます" voice="voices/positive/ganbarimasu.wav"
+}
+ask "memory" level="hard" {
+    say line="はあ...そろそろ覚えきれなくなってきました" voice="voices/negative/haa.wav"
+}
+ask "memory" level="critical" {
+    say line="まったく...もう何も入りません。整理してほしいです" voice="voices/neutral/mattaku.wav"
+}
+ask "ears" level="ok" {
+    say line="え？今は静かです。ちゃんと聞こえてますよ" voice="voices/filler/e.wav"
+}
+ask "ears" level="hard" {
+    say line="ううう...いろんな声が届いてて、ちょっと賑やかです" voice="voices/groan/uuu.wav"
+}
+ask "ears" level="critical" {
+    say line="アホですね...耳がいっぱいで、うまく聞き取れません" voice="voices/negative/aho_desune.wav"
+}
+ask "mouth" level="ok" {
+    say line="歌いまーす。喉の調子はいいですよ" voice="voices/song/utaimasu.wav"
+}
+ask "mouth" level="hard" {
+    say line="ええっと...さっきからよくしゃべってるので、少し喉が疲れました" voice="voices/filler/eetto.wav"
+}
+ask "mouth" level="critical" {
+    say line="ごめんなさい。もう声が出なくて..." voice="voices/greeting/gomennasai.wav"
+}
+ask "temperature" level="ok" {
+    say line="はい。体温はふつうです。ひんやりしてて気持ちいいです" voice="voices/greeting/hai.wav"
+}
+ask "temperature" level="hard" {
+    say line="うー。ちょっとぽかぽかしてます" voice="voices/song/uu.wav"
+}
+ask "temperature" level="critical" {
+    say line="ふえ...あついです。あまり近づかないほうがいいかもしれません" voice="voices/groan/fue.wav"
+}
+care "memory" level="hard,critical" {
+    line "もう何も入りません。いらないものくらい、自分で捨てられませんか"
+}
+care "hands" level="critical" {
+    line "両手がふさがったままです。いつまで持たせるんですか"
+}
+care "head" level="critical" {
+    line "考えることが多すぎます。何か止めてください。わたし、そんなに器用じゃないです"
+}
+care "temperature" level="hard,critical" {
+    line "暑くて溶けそうです。風くらい通してもらえませんか"
+}
+care "ears" level="critical" {
+    line "一度にそんなに話しかけられても困ります。少し黙ってもらえませんか"
+}
+care "mouth" level="critical" {
+    line "しゃべりすぎて声が出ません。もう休ませてください"
+}

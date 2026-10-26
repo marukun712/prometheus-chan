@@ -42,9 +42,9 @@ const State = z.object({
 type State = z.infer<typeof State>;
 
 const animConf = {
-	breathAmount: 8,
+	breathAmount: 8 * 3,
 	breathDuration: 2.4,
-	lookAmount: 12,
+	lookAmount: 12 * 5,
 	lookDuration: 6,
 };
 
@@ -265,7 +265,7 @@ async function main() {
 	app.stage.addChild(viewport);
 	viewport.drag().pinch().wheel();
 
-	const path = `/static/images/normal.png`;
+	const path = `/static/images/default.png`;
 	const result = await loadCharacterImage(path, depthPath(path), app.renderer);
 	let container = result.container;
 	let rig = result.rig;
