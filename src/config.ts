@@ -12,6 +12,8 @@ export const CharacterSchema = z.object({
 	levels: z.array(
 		z.object({
 			name: z.string(),
+			label: z.string(),
+			color: z.string(),
 			enter: z.number(),
 			exit: z.number().optional(),
 			voices: z.array(z.string()),
@@ -61,6 +63,8 @@ function readCharacter(doc: Document) {
 		name: childArg(doc.findNodeByName("character"), "name"),
 		levels: doc.findNodeByName("levels")?.children?.nodes.map((n) => ({
 			name: n.getName(),
+			label: childArg(n, "label"),
+			color: childArg(n, "color"),
 			enter: n.getProperty("enter"),
 			exit: n.getProperty("exit"),
 			voices: n.children?.findNodesByName("voice").map((v) => arg(v)) ?? [],

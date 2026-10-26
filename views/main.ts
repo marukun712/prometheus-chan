@@ -22,6 +22,25 @@ const Message = z.object({
 });
 type Message = z.infer<typeof Message>;
 
+const State = z.object({
+	levels: z.array(
+		z.object({
+			name: z.string(),
+			label: z.string(),
+			color: z.string(),
+		}),
+	),
+	parts: z.array(
+		z.object({
+			id: z.string(),
+			label: z.string(),
+		}),
+	),
+	levelState: z.record(z.string(), z.string()),
+	eventState: z.record(z.string(), z.number()),
+});
+type State = z.infer<typeof State>;
+
 const animConf = {
 	breathAmount: 8,
 	breathDuration: 2.4,
@@ -153,6 +172,33 @@ function appendChatMessage(log: HTMLElement, message: Message) {
 	log.scrollTop = log.scrollHeight;
 }
 
+async function fetchState(): Promise<State | null> {
+	try {
+		const res = await fetch("/state");
+		if (!res.ok) return null;
+		return State.parse(await res.json());
+	} catch (e) {
+		console.error(e);
+		return null;
+	}
+}
+
+function renderState(view: HTMLElement, state: State) {
+	view.replaceChildren();
+	for (const part of state.parts) {
+		const levelName = state.levelState[part.id];
+		if (!levelName) continue;
+
+		const level = state.levels.find((l) => l.name === levelName);
+		if (!level) continue;
+
+		const item = document.createElement("div");
+		item.textContent = `${part.label}\n${level.label}`;
+		item.style.color = level.color;
+		view.appendChild(item);
+	}
+}
+
 async function main() {
 	let level: number = 1;
 	const stage = document.getElementById("stage");
@@ -160,6 +206,12 @@ async function main() {
 
 	const chatLog = document.getElementById("chat-log");
 	if (!chatLog) return;
+
+	const stateView = document.getElementById("state");
+	if (!stateView) return;
+
+	const initialState = await fetchState();
+	if (initialState) renderState(stateView, initialState);
 
 	const app = await setupCanvas(stage);
 
@@ -190,6 +242,10 @@ async function main() {
 
 	listenMessages(async (message) => {
 		appendChatMessage(chatLog, message);
+
+		const state = await fetchState();
+		if (state) renderState(stateView, state);
+
 		if (message.voice) playVoice(message.voice);
 		if (message.level) {
 			level = levels.indexOf(message.level) + 1;

@@ -163,6 +163,19 @@ export class CharacterRunner {
 		}
 	}
 
+	private state() {
+		return {
+			levels: this.charConf.levels.map((level) => ({
+				name: level.name,
+				label: level.label,
+				color: level.color,
+			})),
+			parts: this.charConf.parts,
+			levelState: Object.fromEntries(this.levelState),
+			eventState: Object.fromEntries(this.eventState),
+		};
+	}
+
 	private messages(): Response {
 		let listener: (message: Message) => void;
 		const stream = new ReadableStream({
@@ -195,6 +208,7 @@ export class CharacterRunner {
 
 		const app = new Elysia()
 			.get("/messages", () => this.messages())
+			.get("/state", () => this.state())
 			.use(staticPlugin({ assets: "static", prefix: "/static" }))
 			.use(staticPlugin({ assets: "dist", prefix: "/" }));
 

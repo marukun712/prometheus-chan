@@ -5,16 +5,36 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>prometheus-chan</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic&display=swap" rel="stylesheet">
   <style>
     html,
     body {
       margin: 0;
       padding: 0;
       overflow: hidden;
+      font-family: "Zen Maru Gothic", sans-serif;
     }
 
     canvas {
       display: block;
+    }
+
+    #state {
+      position: fixed;
+      left: 20px;
+      top: 20px;
+      display: flex;
+      gap: 18px;
+      font-size: 32px;
+      line-height: 1.5;
+      text-shadow: 0 0 4px #ffffff;
+    }
+
+    #state div {
+      white-space: pre-line;
+      text-align: center;
     }
 
     #chat {
@@ -31,7 +51,6 @@
       border-radius: 18px;
       background-color: #fffafb;
       box-shadow: 0 6px 20px rgba(190, 140, 160, 0.25);
-      font-family: system-ui, sans-serif;
       color: #5a4a51;
     }
 
@@ -60,7 +79,7 @@
       animation: pop-in 0.25s ease-out;
     }
 
-    #chat-log li + li {
+    #chat-log li+li {
       margin-top: 8px;
     }
 
@@ -87,6 +106,7 @@
 
 <body>
   <div id="stage"></div>
+  <div id="state"></div>
   <div id="chat">
     <p id="chat-title">メッセージ</p>
     <ul id="chat-log"></ul>

@@ -3,16 +3,22 @@ character "tohoku-zunko" {
 }
 levels {
     ok enter=0.0 {
+        label "ふつう"
+        color "#4a8f6f"
         voice "voices/ok1.wav"
         voice "voices/ok2.wav"
         image "images/normal.png"
     }
     hard enter=0.6 exit=0.5 {
+        label "少し疲れている"
+        color "#c88a2e"
         voice "voices/hard1.wav"
         voice "voices/hard2.wav"
         image "images/hard.png"
     }
     critical enter=0.95 exit=0.9 {
+        label "とても疲れている"
+        color "#c2453c"
         voice "voices/critical1.wav"
         voice "voices/critical2.wav"
         image "images/critical.png"
