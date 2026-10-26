@@ -5,25 +5,25 @@ levels {
     ok enter=0.0 {
         label "ふつう"
         color "#4a8f6f"
-        voice "voices/filler/yoshi.wav"
-        voice "voices/filler/ehehe.wav"
-        voice "voices/greeting/hai.wav"
+        voice "voices/よしっ.wav"
+        voice "voices/えへへ…….wav"
+        voice "voices/はい.wav"
         image "images/default.png"
     }
     hard enter=0.6 exit=0.5 {
         label "すこし疲れています"
         color "#c88a2e"
-        voice "voices/negative/haa.wav"
-        voice "voices/neutral/mou.wav"
-        voice "voices/groan/u_small.wav"
+        voice "voices/はあ…….wav"
+        voice "voices/もう….wav"
+        voice "voices/ぅっ.wav"
         image "images/default.png"
     }
     critical enter=0.95 exit=0.9 {
         label "もう限界です"
         color "#c2453c"
-        voice "voices/negative/aa_mou.wav"
-        voice "voices/negative/muri_desu.wav"
-        voice "voices/groan/uuu.wav"
+        voice "voices/あー、もう！.wav"
+        voice "voices/無理です.wav"
+        voice "voices/ううう…….wav"
         image "images/default.png"
     }
 }
@@ -40,214 +40,214 @@ part "head" "頭"
 part "desk" "作業台"
 part "temp" "体温"
 on "wan-rx" from="*" to="hard" {
-    say line="ええっと...外からの郵便がたくさん届いてます。仕分けしますね" voice="voices/filler/eetto.wav"
+    say line="外からの郵便がたくさん届いてます。仕分けしますね" voice="voices/ええっと…….wav"
 }
 on "wan-rx" from="*" to="critical" {
-    say line="無理です。外からの郵便があふれてます" voice="voices/negative/muri_desu.wav"
-    say line="あぁっ！受け取りきれません" voice="voices/groan/aa.wav"
+    say line="外からの郵便があふれてます" voice="voices/無理です.wav"
+    say line="受け取りきれません" voice="voices/あぁっ！.wav"
 }
 on "wan-rx" from="hard,critical" to="ok" {
-    say line="おつかれさまです。外からの郵便、落ち着いてきました" voice="voices/greeting/otsukaresama.wav"
+    say line="外からの郵便、落ち着いてきました" voice="voices/よしっ.wav"
 }
 on "wan-tx" from="*" to="hard" {
-    say line="発射！外への発送、どんどん出していきますね" voice="voices/dialect/hassha.wav"
+    say line="外への発送が増えてきました。急いで出してます" voice="voices/もう….wav"
 }
 on "wan-tx" from="*" to="critical" {
-    say line="だめです。発送が詰まってます。外への道がいっぱいです" voice="voices/negative/dame_desu.wav"
+    say line="発送が詰まってます。外への道がいっぱいです" voice="voices/だめです.wav"
 }
 on "wan-tx" from="hard,critical" to="ok" {
-    say line="うまくいきましたね。このくらいがちょうどいいんです" voice="voices/game/umaku_ikimashita.wav"
+    say line="外への発送、落ち着いてきました" voice="voices/えへへ…….wav"
 }
 on "wan-link" from="*" to="critical" {
-    say line="あー、もう！外への道が通れません。郵便が出せません" voice="voices/negative/aa_mou.wav"
-    say line="うわぁ...外への道が切れてます" voice="voices/negative/uwaa.wav"
+    say line="外への道が通れません。郵便が出せません" voice="voices/あー、もう！.wav"
+    say line="外への道が切れてます" voice="voices/うわぁ…….wav"
 }
 on "wan-link" from="critical" to="ok" {
-    say line="やりました！外への道、また通れるようになりました" voice="voices/positive/yarimashita.wav"
+    say line="外への道、また通れるようになりました" voice="voices/やりました！.wav"
 }
 on "home-rx" from="*" to="hard" {
-    say line="もう...おうちから出す郵便、たくさん預かってます" voice="voices/neutral/mou.wav"
+    say line="おうちから出す郵便、たくさん預かってます" voice="voices/はあ…….wav"
 }
 on "home-rx" from="*" to="critical" {
-    say line="ううう...おうちからの集荷が止まりません。もう抱えきれないです" voice="voices/groan/uuu.wav"
+    say line="おうちからの集荷が止まりません。もう抱えきれないです" voice="voices/ううう…….wav"
 }
 on "home-rx" from="hard,critical" to="ok" {
-    say line="よしっ。おうちからの集荷、ひと段落しました" voice="voices/filler/yoshi.wav"
+    say line="おうちからの集荷、ひと段落しました" voice="voices/よしっ.wav"
 }
 on "home-tx" from="*" to="hard" {
-    say line="あのですね、おうちへの配達が忙しくなってきました" voice="voices/filler/ano_desune.wav"
+    say line="おうちへの配達が忙しくなってきました" voice="voices/もう….wav"
 }
 on "home-tx" from="*" to="critical" {
-    say line="ひっ。おうちへの配達が追いつきません" voice="voices/groan/hi.wav"
+    say line="おうちへの配達が追いつきません" voice="voices/ひっ.wav"
 }
 on "home-tx" from="hard,critical" to="ok" {
-    say line="えへへ...おうちへの配達、落ち着きました" voice="voices/filler/ehehe.wav"
+    say line="おうちへの配達、落ち着きました" voice="voices/えへへ…….wav"
 }
 on "home-link" from="*" to="critical" {
-    say line="ガーン。おうちに配達に行けません。道がふさがってるみたいです" voice="voices/negative/gaan.wav"
+    say line="おうちに配達に行けません。道がふさがってるみたいです" voice="voices/ガーン.wav"
 }
 on "home-link" from="critical" to="ok" {
-    say line="やりまーす。おうちへの道、通れるようになりました。配達再開しますね" voice="voices/positive/yarimasu.wav"
+    say line="おうちへの道、通れるようになりました。配達再開しますね" voice="voices/やりまーす.wav"
 }
 on "server-rx" from="*" to="hard" {
-    say line="はい。サーバーさんから発送の依頼がいっぱいです" voice="voices/greeting/hai.wav"
+    say line="サーバーさんから発送の依頼がいっぱいです" voice="voices/ぅっ.wav"
 }
 on "server-rx" from="*" to="critical" {
-    say line="アホですか！サーバーさんからの依頼、さばききれません" voice="voices/negative/aho_desuka.wav"
+    say line="サーバーさんからの依頼、さばききれません" voice="voices/無理です.wav"
 }
 on "server-rx" from="hard,critical" to="ok" {
-    say line="そうです。サーバーさんからの依頼、落ち着いてきました" voice="voices/greeting/sou_desu.wav"
+    say line="サーバーさんからの依頼、落ち着いてきました" voice="voices/よしっ.wav"
 }
 on "server-tx" from="*" to="hard" {
-    say line="ぅっ...サーバーさん宛ての郵便が増えてます" voice="voices/groan/u_small.wav"
+    say line="サーバーさん宛ての郵便が増えてます" voice="voices/はあ…….wav"
 }
 on "server-tx" from="*" to="critical" {
-    say line="まったく...サーバーさんへの配達が滞ってます" voice="voices/neutral/mattaku.wav"
+    say line="サーバーさんへの配達が滞ってます" voice="voices/まったく…….wav"
 }
 on "server-tx" from="hard,critical" to="ok" {
-    say line="きりたん砲、発射！サーバーさんへの配達、順調です" voice="voices/dialect/kiritan_hou_hassha.wav"
+    say line="サーバーさんへの配達、順調です" voice="voices/あはは！.wav"
 }
 on "server-link" from="*" to="critical" {
-    say line="いや...サーバーさんのところに行けなくなりました" voice="voices/negative/iya.wav"
+    say line="サーバーさんのところに行けなくなりました" voice="voices/いや…….wav"
 }
 on "server-link" from="critical" to="ok" {
-    say line="ありがとうございます！サーバーさんへの道、復旧しました" voice="voices/greeting/arigatou_excited.wav"
+    say line="サーバーさんへの道、復旧しました" voice="voices/ありがとうございます　興奮.wav"
 }
 on "head" from="*" to="hard" {
-    say line="はあ...仕分けの判断が追いつかなくなってきました" voice="voices/negative/haa.wav"
+    say line="仕分けの判断が追いつかなくなってきました" voice="voices/はあ…….wav"
 }
 on "head" from="*" to="critical" {
-    say line="疲れました...。今日の会話量、上限オーバーです..." voice="voices/game/tsukaremashita.wav"
+    say line="仕分けの判断が追いつきません。もう限界です" voice="voices/ううう…….wav"
 }
 on "head" from="hard,critical" to="ok" {
-    say line="あはは！すっきりしました。もう大丈夫ですよ" voice="voices/filler/ahaha.wav"
+    say line="すっきりしました。もう大丈夫ですよ" voice="voices/あはは！.wav"
 }
 on "desk" from="*" to="hard" {
-    say line="ちぇっ...作業台が散らかってきました" voice="voices/neutral/chee.wav"
+    say line="作業台が散らかってきました" voice="voices/ちぇっ…….wav"
 }
 on "desk" from="*" to="critical" {
-    say line="最低です！作業台がいっぱいで、もう置けません" voice="voices/neutral/saitei_desu.wav"
+    say line="作業台がいっぱいで、もう置けません" voice="voices/最低です！.wav"
 }
 on "desk" from="hard,critical" to="ok" {
-    say line="よしっ。作業台、片付きました" voice="voices/filler/yoshi.wav"
+    say line="作業台、片付きました" voice="voices/よしっ.wav"
 }
 on "temp" from="*" to="hard" {
-    say line="うー。ちょっと暑くなってきましたね" voice="voices/song/uu.wav"
+    say line="ちょっと暑くなってきましたね" voice="voices/うー.wav"
 }
 on "temp" from="*" to="critical" {
-    say line="ふえ...暑いです。このままだと倒れちゃいそう" voice="voices/groan/fue.wav"
+    say line="暑いです。このままだと倒れちゃいそう" voice="voices/ふえ…….wav"
 }
 on "temp" from="hard,critical" to="ok" {
-    say line="好きです。涼しくなってきました。ふう..." voice="voices/positive/suki_desu.wav"
+    say line="涼しくなってきました。生き返ります" voice="voices/えへへ…….wav"
 }
 event "wan-rx-spike"
 event "wan-tx-spike"
 react "wan-rx-spike" when="rise" {
-    say line="ターゲット・ロックオン！外から急に郵便がどっさり届きました" voice="voices/dialect/target_lock_on.wav"
-    say line="え？外から急に郵便が増えてます" voice="voices/filler/e.wav"
+    say line="外から急に郵便がどっさり届きました" voice="voices/あぁっ！.wav"
+    say line="外から急に郵便が増えてます" voice="voices/え？.wav"
 }
 react "wan-tx-spike" when="rise" {
-    say line="そうなんですか？外への発送が急に増えてます。大きな荷物でしょうか" voice="voices/filler/sou_nandesuka.wav"
-    say line="では、出撃します。外への発送が急に増えました" voice="voices/game/shutsugeki.wav"
+    say line="外への発送が急に増えてます。大きな荷物でしょうか" voice="voices/え？.wav"
+    say line="外への発送が急に増えました。急いで出してます" voice="voices/ぁっ.wav"
 }
 ask "wan-rx" level="ok" {
-    say line="はい。外からの郵便、今は落ち着いてます" voice="voices/greeting/hai.wav"
+    say line="外からの郵便、今は落ち着いてます" voice="voices/はい.wav"
 }
 ask "wan-rx" level="hard" {
-    say line="ええっと...外からの郵便がたくさんです。仕分けしてますね" voice="voices/filler/eetto.wav"
+    say line="外からの郵便がたくさんです。仕分けしてますね" voice="voices/ええっと…….wav"
 }
 ask "wan-rx" level="critical" {
-    say line="無理です。受け取りきれないくらい届いてます" voice="voices/negative/muri_desu.wav"
+    say line="受け取りきれないくらい届いてます" voice="voices/無理です.wav"
 }
 ask "wan-tx" level="ok" {
-    say line="よしっ。外への発送、順調です" voice="voices/filler/yoshi.wav"
+    say line="外への発送、順調です" voice="voices/よしっ.wav"
 }
 ask "wan-tx" level="hard" {
-    say line="ぅっ...発送が増えてきました。急いで出してます" voice="voices/groan/u_small.wav"
+    say line="発送が増えてきました。急いで出してます" voice="voices/もう….wav"
 }
 ask "wan-tx" level="critical" {
-    say line="だめです。発送が詰まってます" voice="voices/negative/dame_desu.wav"
+    say line="発送が詰まってます" voice="voices/だめです.wav"
 }
 ask "wan-link" level="ok" {
-    say line="そうです。外への道、ちゃんと通れます" voice="voices/greeting/sou_desu.wav"
+    say line="外への道、ちゃんと通れます" voice="voices/そうです　相槌.wav"
 }
 ask "wan-link" level="critical" {
-    say line="ガーン。外への道が通れません" voice="voices/negative/gaan.wav"
+    say line="外への道が通れません" voice="voices/ガーン.wav"
 }
 ask "home-rx" level="ok" {
-    say line="えへへ...おうちからの集荷、落ち着いてます" voice="voices/filler/ehehe.wav"
+    say line="おうちからの集荷、落ち着いてます" voice="voices/えへへ…….wav"
 }
 ask "home-rx" level="hard" {
-    say line="もう...おうちからの集荷が増えてます" voice="voices/neutral/mou.wav"
+    say line="おうちからの集荷が増えてます" voice="voices/はあ…….wav"
 }
 ask "home-rx" level="critical" {
-    say line="ううう...おうちからの集荷が止まりません" voice="voices/groan/uuu.wav"
+    say line="おうちからの集荷が止まりません" voice="voices/ううう…….wav"
 }
 ask "home-tx" level="ok" {
-    say line="やりまーす。おうちへの配達、順調です" voice="voices/positive/yarimasu.wav"
+    say line="おうちへの配達、順調です" voice="voices/はい.wav"
 }
 ask "home-tx" level="hard" {
-    say line="あのですね、おうちへの配達が忙しくなってます" voice="voices/filler/ano_desune.wav"
+    say line="おうちへの配達が忙しくなってます" voice="voices/もう….wav"
 }
 ask "home-tx" level="critical" {
-    say line="ひっ。おうちへの配達が追いつきません" voice="voices/groan/hi.wav"
+    say line="おうちへの配達が追いつきません" voice="voices/ひっ.wav"
 }
 ask "home-link" level="ok" {
-    say line="はい。おうちへの道、通れます" voice="voices/greeting/hai.wav"
+    say line="おうちへの道、通れます" voice="voices/はい.wav"
 }
 ask "home-link" level="critical" {
-    say line="いや...おうちへの道がふさがってます" voice="voices/negative/iya.wav"
+    say line="おうちへの道がふさがってます" voice="voices/いや…….wav"
 }
 ask "server-rx" level="ok" {
-    say line="ふーん。サーバーさんからの依頼、落ち着いてます" voice="voices/filler/fuun.wav"
+    say line="サーバーさんからの依頼、落ち着いてます" voice="voices/そうです　相槌.wav"
 }
 ask "server-rx" level="hard" {
-    say line="そうそう。サーバーさんからの依頼が増えてます" voice="voices/filler/sousou.wav"
+    say line="サーバーさんからの依頼が増えてます" voice="voices/ぅっ.wav"
 }
 ask "server-rx" level="critical" {
-    say line="アホですね...サーバーさんからの依頼、さばききれません" voice="voices/negative/aho_desune.wav"
+    say line="サーバーさんからの依頼、さばききれません" voice="voices/無理です.wav"
 }
 ask "server-tx" level="ok" {
-    say line="発射！サーバーさんへの配達、順調です" voice="voices/dialect/hassha.wav"
+    say line="サーバーさんへの配達、順調です" voice="voices/よしっ.wav"
 }
 ask "server-tx" level="hard" {
-    say line="はあ...サーバーさん宛ての郵便が増えてます" voice="voices/negative/haa.wav"
+    say line="サーバーさん宛ての郵便が増えてます" voice="voices/はあ…….wav"
 }
 ask "server-tx" level="critical" {
-    say line="まったく...サーバーさんへの配達が滞ってます" voice="voices/neutral/mattaku.wav"
+    say line="サーバーさんへの配達が滞ってます" voice="voices/まったく…….wav"
 }
 ask "server-link" level="ok" {
-    say line="それでは。サーバーさんへの道、通れます" voice="voices/greeting/soredewa.wav"
+    say line="サーバーさんへの道、通れます" voice="voices/はい.wav"
 }
 ask "server-link" level="critical" {
-    say line="うわぁ...サーバーさんのところに行けません" voice="voices/negative/uwaa.wav"
+    say line="サーバーさんのところに行けません" voice="voices/うわぁ…….wav"
 }
 ask "head" level="ok" {
-    say line="ま、わたしが本気を出せば、こんなもんですね" voice="voices/game/honki.wav"
+    say line="いまは余裕があります。このくらい、わたしには簡単です" voice="voices/よしっ.wav"
 }
 ask "head" level="hard" {
-    say line="ええっと...仕分けの判断が少し追いつきません" voice="voices/filler/eetto.wav"
+    say line="仕分けの判断が少し追いつきません" voice="voices/はあ…….wav"
 }
 ask "head" level="critical" {
-    say line="ごめんなさい。頭がいっぱいです。少し待ってください" voice="voices/greeting/gomennasai.wav"
+    say line="頭がいっぱいです。少し待ってください" voice="voices/ごめんなさい.wav"
 }
 ask "desk" level="ok" {
-    say line="よしっ。作業台はきれいです" voice="voices/filler/yoshi.wav"
+    say line="作業台はきれいです" voice="voices/はい.wav"
 }
 ask "desk" level="hard" {
-    say line="ちぇっ...作業台が散らかってきました" voice="voices/neutral/chee.wav"
+    say line="作業台が散らかってきました" voice="voices/ちぇっ…….wav"
 }
 ask "desk" level="critical" {
-    say line="最低です！作業台がいっぱいで、もう置けません" voice="voices/neutral/saitei_desu.wav"
+    say line="作業台がいっぱいで、もう置けません" voice="voices/最低です！.wav"
 }
 ask "temp" level="ok" {
-    say line="はい。体温はふつうです" voice="voices/greeting/hai.wav"
+    say line="体温はふつうです" voice="voices/はい.wav"
 }
 ask "temp" level="hard" {
-    say line="うー。ちょっと暑くなってきました" voice="voices/song/uu.wav"
+    say line="ちょっと暑くなってきました" voice="voices/うー.wav"
 }
 ask "temp" level="critical" {
-    say line="ふえ...あついです。ふらふらします" voice="voices/groan/fue.wav"
+    say line="あついです。ふらふらします" voice="voices/ふえ…….wav"
 }
 care "desk" level="hard,critical" {
     line "作業台がぐちゃぐちゃです。片付けるの、手伝ってくれませんか"

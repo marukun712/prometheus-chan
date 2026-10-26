@@ -212,7 +212,7 @@ async function renderCare(view: HTMLElement) {
 
 		if (lines.length === 0) {
 			const item = document.createElement("li");
-			item.textContent = "いまは特にありません。ありがとうございます";
+			item.textContent = "特にないよ";
 			view.appendChild(item);
 			return;
 		}

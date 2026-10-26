@@ -255,7 +255,14 @@ export class CharacterRunner {
 			.get("/state", () => this.state())
 			.get("/ask", (ctx) => this.ask(ctx.query.part))
 			.get("/care", () => this.care())
-			.use(staticPlugin({ assets: "static", prefix: "/static" }))
+			// 日本語のファイル名を扱うため、URLのデコードを有効にする
+			.use(
+				staticPlugin({
+					assets: "static",
+					prefix: "/static",
+					decodeURI: true,
+				}),
+			)
 			.use(staticPlugin({ assets: "dist", prefix: "/" }));
 
 		Deno.serve({ port: this.metricConf.server.port }, app.fetch);

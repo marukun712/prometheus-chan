@@ -5,25 +5,25 @@ levels {
     ok enter=0.0 {
         label "ふつう"
         color "#4a8f6f"
-        voice "voices/filler/yoshi.wav"
-        voice "voices/filler/ehehe.wav"
-        voice "voices/greeting/hai.wav"
+        voice "voices/よしっ.wav"
+        voice "voices/えへへ…….wav"
+        voice "voices/はい.wav"
         image "images/default.png"
     }
     hard enter=0.6 exit=0.5 {
         label "すこし疲れています"
         color "#c88a2e"
-        voice "voices/negative/haa.wav"
-        voice "voices/neutral/mou.wav"
-        voice "voices/groan/u_small.wav"
+        voice "voices/はあ…….wav"
+        voice "voices/もう….wav"
+        voice "voices/ぅっ.wav"
         image "images/default.png"
     }
     critical enter=0.95 exit=0.9 {
         label "もう限界です"
         color "#c2453c"
-        voice "voices/negative/aa_mou.wav"
-        voice "voices/negative/muri_desu.wav"
-        voice "voices/groan/uuu.wav"
+        voice "voices/あー、もう！.wav"
+        voice "voices/無理です.wav"
+        voice "voices/ううう…….wav"
         image "images/default.png"
     }
 }
@@ -33,154 +33,137 @@ part "memory" "記憶"
 part "ears" "耳"
 part "mouth" "口"
 part "temperature" "体温"
-on "head" from="ok" to="hard" {
-    say line="ええっと...考えることが増えてきました" voice="voices/filler/eetto.wav"
-    say line="はあ...また考えごとが増えました" voice="voices/negative/haa.wav"
-}
-on "head" from="critical" to="hard" {
-    say line="よしっ。だいぶ頭が回るようになってきました。あと少しです" voice="voices/filler/yoshi.wav"
+on "head" from="*" to="hard" {
+    say line="考えることが増えてきました。少し忙しいです" voice="voices/はあ…….wav"
+    say line="頭のなかが、だいぶ混み合ってきました" voice="voices/ぅっ.wav"
 }
 on "head" from="*" to="critical" {
-    say line="無理です。頭がぐるぐるして、もう何も考えられません" voice="voices/negative/muri_desu.wav"
-    say line="疲れました...。今日の会話量、上限オーバーです..." voice="voices/game/tsukaremashita.wav"
+    say line="頭がぐるぐるして、もう何も考えられません" voice="voices/無理です.wav"
+    say line="考えることが多すぎます。もう限界です" voice="voices/ううう…….wav"
 }
 on "head" from="hard,critical" to="ok" {
-    say line="うまくいきましたね。このくらいがちょうどいいんです" voice="voices/game/umaku_ikimashita.wav"
+    say line="頭がすっきりしました。このくらいがちょうどいいんです" voice="voices/よしっ.wav"
+    say line="ようやく落ち着きました。これなら考えられます" voice="voices/えへへ…….wav"
 }
-on "hands" from="ok" to="hard" {
-    say line="あのですね、両手がふさがってきました" voice="voices/filler/ano_desune.wav"
-}
-on "hands" from="critical" to="hard" {
-    say line="よしっ。少し手が空きました。片手くらいは使えます" voice="voices/filler/yoshi.wav"
+on "hands" from="*" to="hard" {
+    say line="両手がふさがってきました" voice="voices/あのですね.wav"
 }
 on "hands" from="*" to="critical" {
-    say line="あぁっ！もう持てません。何か落としちゃいます" voice="voices/groan/aa.wav"
-    say line="だめです。これ以上は抱えられません" voice="voices/negative/dame_desu.wav"
+    say line="もう持てません。何か落としちゃいます" voice="voices/あぁっ！.wav"
+    say line="これ以上は抱えられません" voice="voices/だめです.wav"
 }
 on "hands" from="hard,critical" to="ok" {
-    say line="やりました！手が空きました。身軽になりましたね" voice="voices/positive/yarimashita.wav"
+    say line="手が空きました。身軽になりましたね" voice="voices/やりました！.wav"
 }
-on "memory" from="ok" to="hard" {
-    say line="もう...覚えることが多いですね" voice="voices/neutral/mou.wav"
-}
-on "memory" from="critical" to="hard" {
-    say line="そうそう。少し忘れたら、だいぶ楽になりました" voice="voices/filler/sousou.wav"
+on "memory" from="*" to="hard" {
+    say line="覚えることが多くなってきました" voice="voices/もう….wav"
 }
 on "memory" from="*" to="critical" {
-    say line="ガーン。もう新しいことは覚えられません" voice="voices/negative/gaan.wav"
-    say line="無理です。これ以上は入りません" voice="voices/negative/muri_desu.wav"
+    say line="もう新しいことは覚えられません" voice="voices/ガーン.wav"
+    say line="これ以上は入りません" voice="voices/無理です.wav"
 }
 on "memory" from="hard,critical" to="ok" {
-    say line="大成功です！これはずんねえさまに褒められちゃいますね...！" voice="voices/game/daiseikou.wav"
+    say line="いろいろ忘れられました。すっきりしました" voice="voices/えへへ…….wav"
 }
-on "ears" from="ok" to="hard" {
-    say line="なにしてるんです？話しかけられることが増えてきました" voice="voices/filler/nani_shiterundesu.wav"
-}
-on "ears" from="critical" to="hard" {
-    say line="ふーん。だいぶ静かになってきました。やっと一人ずつ聞けます" voice="voices/filler/fuun.wav"
+on "ears" from="*" to="hard" {
+    say line="話しかけられることが増えてきました" voice="voices/ぅっ.wav"
 }
 on "ears" from="*" to="critical" {
-    say line="ばかばか！みんな一斉にしゃべらないでください。耳がパンクします" voice="voices/neutral/bakabaka.wav"
-    say line="アホですか！一度にそんなに話されても、聞き取れません" voice="voices/negative/aho_desuka.wav"
+    say line="みんな一斉にしゃべらないでください。耳がパンクします" voice="voices/ばかばか！.wav"
+    say line="一度にそんなに話されても、聞き取れません" voice="voices/アホですか！.wav"
 }
 on "ears" from="hard,critical" to="ok" {
-    say line="おつかれさまです。やっと静かになりました" voice="voices/greeting/otsukaresama.wav"
+    say line="やっと静かになりました。一人ずつ聞けます" voice="voices/よしっ.wav"
 }
-on "mouth" from="ok" to="hard" {
-    say line="ぅっ...しゃべりすぎて、喉がカラカラです" voice="voices/groan/u_small.wav"
-}
-on "mouth" from="critical" to="hard" {
-    say line="はい。やっと一息つけます" voice="voices/greeting/hai.wav"
+on "mouth" from="*" to="hard" {
+    say line="しゃべりすぎて、喉がカラカラです" voice="voices/はあ…….wav"
 }
 on "mouth" from="*" to="critical" {
-    say line="ううう...もう声が出ません。お水ください" voice="voices/groan/uuu.wav"
+    say line="もう声が出ません。お水ください" voice="voices/ううう…….wav"
 }
 on "mouth" from="hard,critical" to="ok" {
-    say line="それでは。しゃべり疲れたので、しばらく静かにしてますね" voice="voices/greeting/soredewa.wav"
+    say line="しゃべり疲れました。しばらく静かにしてますね" voice="voices/んっ.wav"
 }
-on "temperature" from="ok" to="hard" {
-    say line="うー。ちょっとぽかぽかしてきました" voice="voices/song/uu.wav"
-}
-on "temperature" from="critical" to="hard" {
-    say line="んっ。まだ少し火照ってますけど、峠は越えました" voice="voices/groan/n.wav"
+on "temperature" from="*" to="hard" {
+    say line="ちょっとぽかぽかしてきました" voice="voices/うー.wav"
 }
 on "temperature" from="*" to="critical" {
-    say line="あー、もう！ふらふらします。何か冷たいものをください" voice="voices/negative/aa_mou.wav"
-    say line="ひっ。あつすぎます。もう限界です" voice="voices/groan/hi.wav"
+    say line="ふらふらします。何か冷たいものをください" voice="voices/あー、もう！.wav"
+    say line="あつすぎます。もう限界です" voice="voices/ひっ.wav"
 }
 on "temperature" from="hard,critical" to="ok" {
-    say line="好きです。このひんやりした感じ、落ち着きます" voice="voices/positive/suki_desu.wav"
+    say line="ひんやりしてて、落ち着きます" voice="voices/えへへ…….wav"
 }
 event "visitor"
 react "visitor" when="rise" {
-    say line="こんにちは" voice="voices/greeting/konnichiwa.wav"
-    say line="こんばんは" voice="voices/greeting/konbanwa.wav"
-    say line="おかえりなさい" voice="voices/greeting/okaerinasai.wav"
-    say line="...つっついても何も出ませんよ" voice="voices/touch/tsuttsuite.wav"
+    say line="こんにちは" voice="voices/こんにちは.wav"
+    say line="こんばんは" voice="voices/こんばんは.wav"
+    say line="おはようございます" voice="voices/おはようございます.wav"
+    say line="おかえりなさい" voice="voices/おかえりなさい.wav"
 }
 react "visitor" when="fall" {
-    say line="いってらっしゃい" voice="voices/greeting/itterasshai.wav"
-    say line="さようなら..." voice="voices/greeting/sayounara_lonely.wav"
-    say line="へばな。" voice="voices/dialect/hebana.wav"
+    say line="いってらっしゃい" voice="voices/いってらっしゃい.wav"
+    say line="さようなら..." voice="voices/さようなら　寂しい.wav"
+    say line="へばな。" voice="voices/へばな。.wav"
 }
 event "oom-kill"
 react "oom-kill" when="rise" {
-    say line="うわぁ...持ちきれなくて、何か落としちゃいました" voice="voices/negative/uwaa.wav"
-    say line="ぁっ。すみません、取り落としました" voice="voices/groan/a_small.wav"
+    say line="持ちきれなくて、何か落としちゃいました" voice="voices/うわぁ…….wav"
+    say line="すみません、取り落としました" voice="voices/ぁっ.wav"
 }
 ask "head" level="ok" {
-    say line="ま、わたしが本気を出せば、こんなもんですね" voice="voices/game/honki.wav"
+    say line="いまは余裕があります。なんでも考えられますよ" voice="voices/はい.wav"
 }
 ask "head" level="hard" {
-    say line="そうです。いま考えることが多くて、少し忙しいです" voice="voices/greeting/sou_desu.wav"
+    say line="考えることが多くて、少し忙しいです" voice="voices/そうです　相槌.wav"
 }
 ask "head" level="critical" {
-    say line="ごめんなさい。今は頭がいっぱいで...後にしてもらえますか" voice="voices/greeting/gomennasai.wav"
+    say line="今は頭がいっぱいで...後にしてもらえますか" voice="voices/ごめんなさい.wav"
 }
 ask "hands" level="ok" {
-    say line="やりまーす。両手はまだ空いてます。何か持ちましょうか" voice="voices/positive/yarimasu.wav"
+    say line="両手はまだ空いてます。何か持ちましょうか" voice="voices/やりまーす.wav"
 }
 ask "hands" level="hard" {
-    say line="はい。だいぶ抱えてますけど、まだ平気です" voice="voices/greeting/hai.wav"
+    say line="だいぶ抱えてますけど、まだ平気です" voice="voices/はい.wav"
 }
 ask "hands" level="critical" {
-    say line="ぅっ...手がふさがってて、動けないです" voice="voices/groan/u_small.wav"
+    say line="手がふさがってて、動けないです" voice="voices/ぅっ.wav"
 }
 ask "memory" level="ok" {
-    say line="がんばります！まだいろんな物を覚えられます" voice="voices/positive/ganbarimasu.wav"
+    say line="まだいろんな物を覚えられます" voice="voices/がんばります！.wav"
 }
 ask "memory" level="hard" {
-    say line="はあ...そろそろ覚えきれなくなってきました" voice="voices/negative/haa.wav"
+    say line="そろそろ覚えきれなくなってきました" voice="voices/はあ…….wav"
 }
 ask "memory" level="critical" {
-    say line="まったく...もう何も入りません。整理してほしいです" voice="voices/neutral/mattaku.wav"
+    say line="もう何も入りません。整理してほしいです" voice="voices/まったく…….wav"
 }
 ask "ears" level="ok" {
-    say line="え？今は静かです。ちゃんと聞こえてますよ" voice="voices/filler/e.wav"
+    say line="今は静かです。ちゃんと聞こえてますよ" voice="voices/そうです　相槌.wav"
 }
 ask "ears" level="hard" {
-    say line="ううう...いろんな声が届いてて、ちょっと賑やかです" voice="voices/groan/uuu.wav"
+    say line="いろんな声が届いてて、ちょっと賑やかです" voice="voices/ううう…….wav"
 }
 ask "ears" level="critical" {
-    say line="アホですね...耳がいっぱいで、うまく聞き取れません" voice="voices/negative/aho_desune.wav"
+    say line="耳がいっぱいで、うまく聞き取れません" voice="voices/無理です.wav"
 }
 ask "mouth" level="ok" {
-    say line="歌いまーす。喉の調子はいいですよ" voice="voices/song/utaimasu.wav"
+    say line="喉の調子はいいですよ" voice="voices/よしっ.wav"
 }
 ask "mouth" level="hard" {
-    say line="ええっと...さっきからよくしゃべってるので、少し喉が疲れました" voice="voices/filler/eetto.wav"
+    say line="さっきからよくしゃべってるので、少し喉が疲れました" voice="voices/はあ…….wav"
 }
 ask "mouth" level="critical" {
-    say line="ごめんなさい。もう声が出なくて..." voice="voices/greeting/gomennasai.wav"
+    say line="もう声が出なくて..." voice="voices/ごめんなさい.wav"
 }
 ask "temperature" level="ok" {
-    say line="はい。体温はふつうです。ひんやりしてて気持ちいいです" voice="voices/greeting/hai.wav"
+    say line="体温はふつうです。ひんやりしてて気持ちいいです" voice="voices/はい.wav"
 }
 ask "temperature" level="hard" {
-    say line="うー。ちょっとぽかぽかしてます" voice="voices/song/uu.wav"
+    say line="ちょっとぽかぽかしてます" voice="voices/うー.wav"
 }
 ask "temperature" level="critical" {
-    say line="ふえ...あついです。あまり近づかないほうがいいかもしれません" voice="voices/groan/fue.wav"
+    say line="あついです。あまり近づかないほうがいいかもしれません" voice="voices/ふえ…….wav"
 }
 care "memory" level="hard,critical" {
     line "もう何も入りません。いらないものくらい、自分で捨てられませんか"
