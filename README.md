@@ -117,12 +117,12 @@ care "head" level="critical" {
 ## サンプル
 
 東北きりたん
-conf/character/kiritan/node.kdl ... node_exporter向けのサンプルキャラクター
-conf/character/kiritan/home-router.kdl ... 家庭用VLANとサーバー用VLANがある家庭環境向けホームルーター監視キャラクター
+- conf/character/kiritan/node.kdl ... node_exporter向けのサンプルキャラクター
+- conf/character/kiritan/home-router.kdl ... 家庭用VLANとサーバー用VLANがある家庭環境向けホームルーター監視キャラクター
 
 メトリクス
-conf/metrics/node/ix2215.kdl ... UNIVERGE IX2215の監視。IF-MIBとルーターのプライベートMIBが必要
-conf/metrics/node_exporter.kdl ... node_exporterを使った監視
+- conf/metrics/node/ix2215.kdl ... UNIVERGE IX2215の監視。IF-MIBとルーターのプライベートMIBが必要
+- conf/metrics/node_exporter.kdl ... node_exporterを使った監視
 
 # License
 本ソフトウェアは、MIT Licenseの元で公開されます。ただし、static配下のアセットには適用されません。
