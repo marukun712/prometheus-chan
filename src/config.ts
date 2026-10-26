@@ -6,6 +6,21 @@ const arg = (n: Node | undefined, i = 0) => n?.getArgument(i);
 const childArg = (n: Node | undefined, name: string) =>
 	arg(n?.children?.findNodeByName(name));
 
+const SaysSchema = z.array(
+	z.object({
+		line: z.string(),
+		voice: z.string().optional(),
+		image: z.string().optional(),
+	}),
+);
+
+const readSays = (n: Node | undefined) =>
+	n?.children?.findNodesByName("say").map((s) => ({
+		line: s.getProperty("line"),
+		voice: s.getProperty("voice"),
+		image: s.getProperty("image"),
+	}));
+
 export const CharacterSchema = z.object({
 	id: z.string(),
 	name: z.string(),
@@ -31,13 +46,7 @@ export const CharacterSchema = z.object({
 			part: z.string().optional(),
 			from: z.string().transform((s) => s.split(",")),
 			to: z.string(),
-			says: z.array(
-				z.object({
-					line: z.string(),
-					voice: z.string().optional(),
-					image: z.string().optional(),
-				}),
-			),
+			says: SaysSchema,
 		}),
 	),
 	events: z.array(z.string()),
@@ -45,13 +54,21 @@ export const CharacterSchema = z.object({
 		z.object({
 			event: z.string(),
 			when: z.enum(["rise", "fall"]),
-			says: z.array(
-				z.object({
-					line: z.string(),
-					voice: z.string().optional(),
-					image: z.string().optional(),
-				}),
-			),
+			says: SaysSchema,
+		}),
+	),
+	ask: z.array(
+		z.object({
+			part: z.string(),
+			level: z.string().transform((s) => s.split(",")),
+			says: SaysSchema,
+		}),
+	),
+	care: z.array(
+		z.object({
+			part: z.string(),
+			level: z.string().transform((s) => s.split(",")),
+			line: z.string(),
 		}),
 	),
 });
@@ -78,21 +95,23 @@ function readCharacter(doc: Document) {
 			part: arg(n),
 			from: n.getProperty("from"),
 			to: n.getProperty("to"),
-			says: n.children?.findNodesByName("say").map((n) => ({
-				line: n.getProperty("line"),
-				voice: n.getProperty("voice"),
-				image: n.getProperty("image"),
-			})),
+			says: readSays(n),
 		})),
 		events: doc.findNodesByName("event").map((n) => arg(n)),
 		react: doc.findNodesByName("react").map((n) => ({
 			event: arg(n),
 			when: n.getProperty("when"),
-			says: n.children?.findNodesByName("say").map((n) => ({
-				line: n.getProperty("line"),
-				voice: n.getProperty("voice"),
-				image: n.getProperty("image"),
-			})),
+			says: readSays(n),
+		})),
+		ask: doc.findNodesByName("ask").map((n) => ({
+			part: arg(n),
+			level: n.getProperty("level"),
+			says: readSays(n),
+		})),
+		care: doc.findNodesByName("care").map((n) => ({
+			part: arg(n),
+			level: n.getProperty("level"),
+			line: childArg(n, "line"),
 		})),
 	};
 }

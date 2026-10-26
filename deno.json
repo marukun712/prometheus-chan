@@ -18,7 +18,7 @@
 		"check": "deno check && deno run -A npm:@biomejs/biome check --write ./",
 		"check:unsafe": "deno check && deno run -A npm:@biomejs/biome check --write --unsafe ./",
 		"build": "deno bundle --platform=browser --outdir dist views/index.html",
-		"fmt": "dx kdlfmt format static --kdl-version v1",
+		"fmt": "dx kdlfmt format ./conf --kdl-version v1",
 		"runner": "deno --allow-read --allow-net --allow-env src/main.ts"
 	}
 }

@@ -138,8 +138,125 @@ on "temp" from="hard,critical" to="ok" {
 event "wan-rx-spike"
 event "wan-tx-spike"
 react "wan-rx-spike" when="rise" {
-    say line="わっ、外から急に郵便がどっさり届きました！" image="images/critical.png"
+    say line="わっ、外から急に郵便がどっさり届きました！"
 }
 react "wan-tx-spike" when="rise" {
-    say line="あれ、外への発送が急に増えてます。何か大きな荷物でしょうか？" image="images/critical.png"
+    say line="あれ、外への発送が急に増えてます。何か大きな荷物でしょうか？"
+}
+ask "wan-rx" level="ok" {
+    say line="外からの郵便、今は落ち着いてます"
+}
+ask "wan-rx" level="hard" {
+    say line="外からの郵便がたくさんです。仕分けしてますね"
+}
+ask "wan-rx" level="critical" {
+    say line="受け取りきれないくらい届いてます...！"
+}
+ask "wan-tx" level="ok" {
+    say line="外への発送、順調です"
+}
+ask "wan-tx" level="hard" {
+    say line="発送が増えてきました。急いで出してます"
+}
+ask "wan-tx" level="critical" {
+    say line="発送が詰まってます...！"
+}
+ask "wan-link" level="ok" {
+    say line="外への道、ちゃんと通れます"
+}
+ask "wan-link" level="critical" {
+    say line="外への道が通れません..."
+}
+ask "home-rx" level="ok" {
+    say line="おうちからの集荷、落ち着いてます"
+}
+ask "home-rx" level="hard" {
+    say line="おうちからの集荷が増えてます"
+}
+ask "home-rx" level="critical" {
+    say line="おうちからの集荷が止まりません...！"
+}
+ask "home-tx" level="ok" {
+    say line="おうちへの配達、順調です"
+}
+ask "home-tx" level="hard" {
+    say line="おうちへの配達が忙しくなってます"
+}
+ask "home-tx" level="critical" {
+    say line="おうちへの配達が追いつきません...！"
+}
+ask "home-link" level="ok" {
+    say line="おうちへの道、通れます"
+}
+ask "home-link" level="critical" {
+    say line="おうちへの道がふさがってます..."
+}
+ask "server-rx" level="ok" {
+    say line="サーバーさんからの依頼、落ち着いてます"
+}
+ask "server-rx" level="hard" {
+    say line="サーバーさんからの依頼が増えてます"
+}
+ask "server-rx" level="critical" {
+    say line="サーバーさんからの依頼、さばききれません...！"
+}
+ask "server-tx" level="ok" {
+    say line="サーバーさんへの配達、順調です"
+}
+ask "server-tx" level="hard" {
+    say line="サーバーさん宛ての郵便が増えてます"
+}
+ask "server-tx" level="critical" {
+    say line="サーバーさんへの配達が滞ってます...！"
+}
+ask "server-link" level="ok" {
+    say line="サーバーさんへの道、通れます"
+}
+ask "server-link" level="critical" {
+    say line="サーバーさんのところに行けません..."
+}
+ask "head" level="ok" {
+    say line="頭はすっきりしてます"
+}
+ask "head" level="hard" {
+    say line="仕分けの判断が少し追いつきません"
+}
+ask "head" level="critical" {
+    say line="頭がいっぱいです...少し待ってください"
+}
+ask "desk" level="ok" {
+    say line="作業台はきれいです"
+}
+ask "desk" level="hard" {
+    say line="作業台が散らかってきました"
+}
+ask "desk" level="critical" {
+    say line="作業台がいっぱいで、もう置けません..."
+}
+ask "temp" level="ok" {
+    say line="体温はふつうです"
+}
+ask "temp" level="hard" {
+    say line="ちょっと暑くなってきました"
+}
+ask "temp" level="critical" {
+    say line="あついです...ふらふらします"
+}
+care "desk" level="hard,critical" {
+    line "作業台が散らかってます。片付けてもらえませんか"
+}
+care "head" level="critical" {
+    line "仕分けの判断が追いつきません。少し荷物を減らしてほしいです"
+}
+care "temp" level="hard,critical" {
+    line "すこし暑いです。涼しくしてもらえると助かります"
+}
+care "wan-link" level="critical" {
+    line "外への道が通れません。見てきてもらえませんか"
+}
+care "home-link" level="critical" {
+    line "おうちへの道が通れません。確認してほしいです"
+}
+care "server-link" level="critical" {
+    line "サーバーさんへの道が通れません。助けてください"
 }

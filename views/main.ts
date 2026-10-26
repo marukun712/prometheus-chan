@@ -192,10 +192,38 @@ function renderState(view: HTMLElement, state: State) {
 		const level = state.levels.find((l) => l.name === levelName);
 		if (!level) continue;
 
-		const item = document.createElement("div");
+		const item = document.createElement("button");
+		item.type = "button";
 		item.textContent = `${part.label}\n${level.label}`;
 		item.style.color = level.color;
+		item.addEventListener("click", () => {
+			fetch(`/ask?part=${encodeURIComponent(part.id)}`);
+		});
 		view.appendChild(item);
+	}
+}
+
+async function renderCare(view: HTMLElement) {
+	view.replaceChildren();
+	try {
+		const res = await fetch("/care");
+		if (!res.ok) return;
+		const lines = z.array(z.string()).parse(await res.json());
+
+		if (lines.length === 0) {
+			const item = document.createElement("li");
+			item.textContent = "いまは特にありません。ありがとうございます";
+			view.appendChild(item);
+			return;
+		}
+
+		for (const line of lines) {
+			const item = document.createElement("li");
+			item.textContent = line;
+			view.appendChild(item);
+		}
+	} catch (e) {
+		console.error(e);
 	}
 }
 
@@ -209,6 +237,17 @@ async function main() {
 
 	const stateView = document.getElementById("state");
 	if (!stateView) return;
+
+	const careView = document.getElementById("care");
+	if (!careView) return;
+
+	const careButton = document.getElementById("care-toggle");
+	if (!careButton) return;
+
+	careButton.addEventListener("click", async () => {
+		careView.hidden = !careView.hidden;
+		if (!careView.hidden) await renderCare(careView);
+	});
 
 	const initialState = await fetchState();
 	if (initialState) renderState(stateView, initialState);

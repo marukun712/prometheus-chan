@@ -30,71 +30,55 @@ part "memory" "記憶"
 part "ears" "耳"
 part "mouth" "口"
 part "temperature" "体温"
-on "head" from="ok" to="ok" {
-    say line="穏やかですね。今日も順調です"
-    say line="頭はすっきりしてます"
-}
 on "head" from="ok" to="hard" {
     say line="考えることが増えてきました"
-    say line="ちょっと頭が忙しくなってきましたね"
-    say line="いま頭の中がいっぱいなので、少しだけ待ってくださいね"
 }
 on "head" from="critical" to="hard" {
     say line="だいぶ頭が回るようになってきました。あと少しです"
 }
 on "head" from="*" to="critical" {
     say line="頭がぐるぐるして...もう何も考えられません..."
-    say line="あれ、何を考えてたんでしたっけ..."
 }
 on "head" from="hard,critical" to="ok" {
     say line="ふぅ、ひと段落です" voice="voices/done1.wav"
-    say line="頭すっきりしました" voice="voices/done2.wav"
 }
 on "hands" from="ok" to="hard" {
     say line="両手がふさがってきました"
-    say line="ちょっと抱えすぎてるかもしれません..."
-    say line="誰か少し持ってもらえますか？"
 }
 on "hands" from="critical" to="hard" {
     say line="少し手が空きました。片手くらいは使えます"
 }
 on "hands" from="*" to="critical" {
     say line="もう持てません！何か落としちゃいます...！"
-    say line="どれか手放さないと...全部大事なんですけど..."
 }
 on "hands" from="hard,critical" to="ok" {
     say line="手が空きました。身軽になりましたね" voice="voices/done1.wav"
 }
 on "memory" from="ok" to="hard" {
     say line="最近、覚えることが多いですね"
-    say line="覚えておくことが多すぎて、そろそろ限界です"
 }
 on "memory" from="critical" to="hard" {
     say line="少し忘れたら、だいぶ楽になりました"
 }
 on "memory" from="*" to="critical" {
     say line="もう新しいことが覚えられません...！"
-    say line="記憶がいっぱいみたいです..."
 }
 on "memory" from="hard,critical" to="ok" {
     say line="整理したら、すっきりしました" voice="voices/done2.wav"
 }
 on "ears" from="ok" to="hard" {
     say line="なんだか話しかけられることが増えてきました"
-    say line="ちょっと、順番にお願いします！"
 }
 on "ears" from="critical" to="hard" {
     say line="だいぶ静かになってきました。やっと一人ずつ聞けます"
 }
 on "ears" from="*" to="critical" {
     say line="みんな一斉にしゃべらないでください！耳がパンクします！"
-    say line="もう誰が何を言ってるのかわかりません...！"
 }
 on "ears" from="hard,critical" to="ok" {
     say line="ふぅ、やっと静かになりました" voice="voices/done1.wav"
 }
 on "mouth" from="ok" to="hard" {
-    say line="今日はよくしゃべりますね、私"
     say line="しゃべりすぎて、喉がカラカラです..."
 }
 on "mouth" from="critical" to="hard" {
@@ -108,13 +92,11 @@ on "mouth" from="hard,critical" to="ok" {
 }
 on "temperature" from="ok" to="hard" {
     say line="ちょっとぽかぽかしてきました"
-    say line="顔が火照ってます...窓、開けてもいいですか？"
 }
 on "temperature" from="critical" to="hard" {
     say line="まだ少し火照ってますけど、峠は越えました"
 }
 on "temperature" from="*" to="critical" {
-    say line="あついです...とけちゃいます...！"
     say line="ふらふらします...何か冷たいものをください..."
 }
 on "temperature" from="hard,critical" to="ok" {
@@ -132,5 +114,76 @@ react "visitor" when="fall" {
 event "oom-kill"
 react "oom-kill" when="rise" {
     say line="あっ...持ちきれなくて、何か落としちゃいました"
-    say line="ごめんなさい、誰かの荷物を勝手に片付けちゃいました..."
+}
+ask "head" level="ok" {
+    say line="頭はすっきりしてます。まだ考える余裕ありますよ"
+}
+ask "head" level="hard" {
+    say line="いま考えることが多くて、少し忙しいです"
+}
+ask "head" level="critical" {
+    say line="ごめんなさい、今は頭がいっぱいで...後にしてもらえますか"
+}
+ask "hands" level="ok" {
+    say line="両手はまだ空いてます。何か持ちましょうか"
+}
+ask "hands" level="hard" {
+    say line="だいぶ抱えてますけど、まだ平気です"
+}
+ask "hands" level="critical" {
+    say line="手がふさがってて...すみません、動けないです"
+}
+ask "memory" level="ok" {
+    say line="まだいろんな物を覚えられます！"
+}
+ask "memory" level="hard" {
+    say line="そろそろ覚えきれなくなってきました"
+}
+ask "memory" level="critical" {
+    say line="もう何も入りません...整理してほしいです"
+}
+ask "ears" level="ok" {
+    say line="今は静かです。ちゃんと聞こえてますよ"
+}
+ask "ears" level="hard" {
+    say line="いろんな声が届いてて、ちょっと賑やかです"
+}
+ask "ears" level="critical" {
+    say line="耳がいっぱいで...うまく聞き取れないかもしれません"
+}
+ask "mouth" level="ok" {
+    say line="喉の調子はいいです。よくしゃべれます"
+}
+ask "mouth" level="hard" {
+    say line="さっきからよくしゃべってるので、少し喉が疲れました"
+}
+ask "mouth" level="critical" {
+    say line="もう声が出なくて...すみません"
+}
+ask "temperature" level="ok" {
+    say line="体温はふつうです。ひんやりしてて気持ちいいです"
+}
+ask "temperature" level="hard" {
+    say line="ちょっとぽかぽかしてます"
+}
+ask "temperature" level="critical" {
+    say line="あついです...あまり近づかないほうがいいかもしれません"
+}
+care "memory" level="hard,critical" {
+    line "覚えるものがいっぱいで大変です！覚えるべきものを整理して欲しいです"
+}
+care "hands" level="critical" {
+    line "両手がふさがったままです。何か手放させてください"
+}
+care "head" level="critical" {
+    line "考えることが多すぎます。何か止めてもらえると助かります"
+}
+care "temperature" level="hard,critical" {
+    line "すこし暑いです。風を通してもらえませんか"
+}
+care "ears" level="critical" {
+    line "話しかけられる量が多すぎます。少し減らしてほしいです"
+}
+care "mouth" level="critical" {
+    line "しゃべりすぎて声が出ません。少し休ませてください"
 }

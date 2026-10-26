@@ -16,6 +16,10 @@ type Line = Omit<Message, "time">;
 
 const textEncoder = new TextEncoder();
 
+function pick<T>(items: T[]): T {
+	return items[Math.floor(Math.random() * items.length)];
+}
+
 export class CharacterRunner {
 	private charConf: Character;
 	private metricConf: Metric;
@@ -83,7 +87,7 @@ export class CharacterRunner {
 			if (!event.from.includes("*") && !event.from.includes(from)) continue;
 
 			// say行の立ち絵/音声上書きがある場合はそれを使用
-			const line = event.says[Math.floor(Math.random() * event.says.length)];
+			const line = pick(event.says);
 			const voice = line.voice ?? this.levelVoice(to);
 			const image = line.image ?? this.levelImage(to);
 			return {
@@ -103,8 +107,7 @@ export class CharacterRunner {
 			if (reaction.when !== when) continue;
 
 			// reactにはデフォルト立ち絵は設定できないため、say行で立ち絵が定義されている場合のみ含まれる
-			const line =
-				reaction.says[Math.floor(Math.random() * reaction.says.length)];
+			const line = pick(reaction.says);
 			return {
 				part,
 				text: line.line,
@@ -113,6 +116,47 @@ export class CharacterRunner {
 			};
 		}
 		return null;
+	}
+
+	// 部位クリック時の返事
+	private askLine(part: string): Line | null {
+		const level = this.levelState.get(part);
+		if (!level) return null;
+
+		for (const entry of this.charConf.ask) {
+			if (entry.part !== part) continue;
+			if (!entry.level.includes("*") && !entry.level.includes(level)) continue;
+
+			const line = pick(entry.says);
+			return {
+				part,
+				text: line.line,
+				voice: line.voice,
+				level,
+				image: line.image,
+			};
+		}
+		return null;
+	}
+
+	private ask(part: string | undefined) {
+		if (!part) return { ok: false };
+
+		const line = this.askLine(part);
+		if (!line) return { ok: false };
+
+		this.publish(line);
+		return { ok: true };
+	}
+
+	// 現在のレベルに当てはまるおせわの要望だけを返す
+	private care(): string[] {
+		return this.charConf.care
+			.filter((entry) => {
+				const level = this.levelState.get(entry.part);
+				return level !== undefined && entry.level.includes(level);
+			})
+			.map((entry) => entry.line);
 	}
 
 	private tickLevel(part: string, value: number) {
@@ -209,6 +253,8 @@ export class CharacterRunner {
 		const app = new Elysia()
 			.get("/messages", () => this.messages())
 			.get("/state", () => this.state())
+			.get("/ask", (ctx) => this.ask(ctx.query.part))
+			.get("/care", () => this.care())
 			.use(staticPlugin({ assets: "static", prefix: "/static" }))
 			.use(staticPlugin({ assets: "dist", prefix: "/" }));
 

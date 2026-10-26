@@ -27,14 +27,40 @@
       top: 20px;
       display: flex;
       gap: 18px;
-      font-size: 32px;
+      font-size: 16px;
       line-height: 1.5;
       text-shadow: 0 0 4px #ffffff;
     }
 
-    #state div {
+    #state button {
+      padding: 0;
+      border: none;
+      background: none;
+      font: inherit;
+      color: inherit;
       white-space: pre-line;
       text-align: center;
+      cursor: pointer;
+    }
+
+    #actions {
+      position: fixed;
+      left: 20px;
+      bottom: 20px;
+      display: flex;
+      gap: 10px;
+    }
+
+    #actions button {
+      padding: 10px 18px;
+      border: 2px solid #f0c4d2;
+      border-radius: 14px;
+      background-color: #fffafb;
+      box-shadow: 0 6px 20px rgba(190, 140, 160, 0.25);
+      font-family: inherit;
+      font-size: 14px;
+      color: #5a4a51;
+      cursor: pointer;
     }
 
     #chat {
@@ -76,7 +102,6 @@
       background-color: #ffffff;
       font-size: 14px;
       line-height: 1.6;
-      animation: pop-in 0.25s ease-out;
     }
 
     #chat-log li+li {
@@ -90,16 +115,25 @@
       color: #bda0aa;
     }
 
-    @keyframes pop-in {
-      from {
-        opacity: 0;
-        transform: translateY(6px);
-      }
+    #care {
+      position: fixed;
+      left: 20px;
+      bottom: 76px;
+      width: 300px;
+      box-sizing: border-box;
+      margin: 0;
+      padding: 14px 14px 14px 32px;
+      border: 2px solid #f0c4d2;
+      border-radius: 18px;
+      background-color: #fffafb;
+      box-shadow: 0 6px 20px rgba(190, 140, 160, 0.25);
+      font-size: 14px;
+      line-height: 1.6;
+      color: #5a4a51;
+    }
 
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
+    #care li+li {
+      margin-top: 6px;
     }
   </style>
 </head>
@@ -107,6 +141,10 @@
 <body>
   <div id="stage"></div>
   <div id="state"></div>
+  <ul id="care" hidden></ul>
+  <div id="actions">
+    <button id="care-toggle" type="button">おせわ</button>
+  </div>
   <div id="chat">
     <p id="chat-title">メッセージ</p>
     <ul id="chat-log"></ul>
