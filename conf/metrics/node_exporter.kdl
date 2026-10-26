@@ -1,4 +1,4 @@
-prometheus url="http://10.0.0.1:9020" interval="10000"
+prometheus url="http://localhost:9090" interval="10000"
 server port=3000
 signal "head" {
     query "1 - avg(rate(node_cpu_seconds_total{mode=\"idle\"}[5m]))"

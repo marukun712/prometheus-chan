@@ -1,0 +1,11 @@
+services:
+  prometheus:
+    image: quay.io/prometheus/prometheus:v3.6.0
+    network_mode: host
+    command:
+      - --config.file=/loadtest/prometheus.yml
+      - --storage.tsdb.path=/prometheus
+      - --storage.tsdb.retention.time=1h
+    volumes:
+      - ./loadtest:/loadtest:ro
+

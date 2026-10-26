@@ -19,6 +19,7 @@
 		"check:unsafe": "deno check && deno run -A npm:@biomejs/biome check --write --unsafe ./",
 		"build": "deno bundle --platform=browser --outdir dist views/index.html",
 		"fmt": "dx kdlfmt format ./conf --kdl-version v1",
-		"runner": "deno --allow-read --allow-net --allow-env src/main.ts"
+		"runner": "deno --allow-read --allow-net --allow-env src/main.ts",
+		"loadtest": "deno run --allow-net loadtest/exporter.ts"
 	}
 }
