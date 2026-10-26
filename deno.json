@@ -5,7 +5,9 @@
 	},
 	"imports": {
 		"@bgotink/kdl": "npm:@bgotink/kdl@^0.4.1",
+		"@elysia/static": "npm:@elysia/static@^1.4.11",
 		"@kokoro/rig": "jsr:@kokoro/rig@^0.10.0",
+		"elysia": "npm:elysia@^1.4.30",
 		"gsap": "npm:gsap@^3.15.0",
 		"kdlfmt": "npm:kdlfmt@^0.1.7",
 		"pixi-viewport": "npm:pixi-viewport@^6.0.3",
@@ -15,10 +17,8 @@
 	"tasks": {
 		"check": "deno check && deno run -A npm:@biomejs/biome check --write ./",
 		"check:unsafe": "deno check && deno run -A npm:@biomejs/biome check --write --unsafe ./",
-		"build": "mkdir -p dist && cp -r views/images dist/images && deno bundle --platform=browser --outdir dist views/index.html",
-
+		"build": "deno bundle --platform=browser --outdir dist views/index.html",
 		"fmt": "dx kdlfmt format static --kdl-version v1",
-		"runner": "deno --allow-read --allow-net --allow-env src/main.ts",
-		"dashboard": "deno run -NR jsr:@std/http/file-server dist"
+		"runner": "deno --allow-read --allow-net --allow-env src/main.ts"
 	}
 }

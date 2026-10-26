@@ -6,16 +6,16 @@ const arg = (n: Node | undefined, i = 0) => n?.getArgument(i);
 const childArg = (n: Node | undefined, name: string) =>
 	arg(n?.children?.findNodeByName(name));
 
-export const Character = z.object({
+export const CharacterSchema = z.object({
 	id: z.string(),
 	name: z.string(),
-	firstPerson: z.string(),
 	levels: z.array(
 		z.object({
 			name: z.string(),
 			enter: z.number(),
 			exit: z.number().optional(),
 			voices: z.array(z.string()),
+			image: z.string(),
 		}),
 	),
 	parts: z.array(
@@ -24,67 +24,70 @@ export const Character = z.object({
 			label: z.string(),
 		}),
 	),
-	events: z.array(
+	on: z.array(
 		z.object({
 			part: z.string().optional(),
 			from: z.string().transform((s) => s.split(",")),
 			to: z.string(),
 			says: z.array(
 				z.object({
-					text: z.string(),
+					line: z.string(),
 					voice: z.string().optional(),
+					image: z.string().optional(),
 				}),
 			),
 		}),
 	),
-	eventParts: z.array(z.string()),
-	reactions: z.array(
+	events: z.array(z.string()),
+	react: z.array(
 		z.object({
 			event: z.string(),
 			when: z.enum(["rise", "fall"]),
 			says: z.array(
 				z.object({
-					text: z.string(),
+					line: z.string(),
 					voice: z.string().optional(),
+					image: z.string().optional(),
 				}),
 			),
 		}),
 	),
 });
-export type Character = z.infer<typeof Character>;
+export type Character = z.infer<typeof CharacterSchema>;
 
 function readCharacter(doc: Document) {
-	const c = doc.findNodeByName("character");
 	return {
-		id: arg(c),
-		name: childArg(c, "name"),
-		firstPerson: childArg(c, "first-person"),
+		id: arg(doc.findNodeByName("character")),
+		name: childArg(doc.findNodeByName("character"), "name"),
 		levels: doc.findNodeByName("levels")?.children?.nodes.map((n) => ({
 			name: n.getName(),
 			enter: n.getProperty("enter"),
 			exit: n.getProperty("exit"),
 			voices: n.children?.findNodesByName("voice").map((v) => arg(v)) ?? [],
+			image: childArg(n, "image"),
 		})),
 		parts: doc.findNodesByName("part").map((n) => ({
 			id: arg(n, 0),
 			label: arg(n, 1),
 		})),
-		events: doc.findNodesByName("on").map((n) => ({
+		on: doc.findNodesByName("on").map((n) => ({
 			part: arg(n),
 			from: n.getProperty("from"),
 			to: n.getProperty("to"),
-			says: n.children?.findNodesByName("say").map((s) => ({
-				text: arg(s, 0),
-				voice: arg(s, 1),
+			says: n.children?.findNodesByName("say").map((n) => ({
+				line: n.getProperty("line"),
+				voice: n.getProperty("voice"),
+				image: n.getProperty("image"),
 			})),
 		})),
-		eventParts: doc.findNodesByName("event").map((n) => arg(n)),
-		reactions: doc.findNodesByName("react").map((n) => ({
+		events: doc.findNodesByName("event").map((n) => arg(n)),
+		react: doc.findNodesByName("react").map((n) => ({
 			event: arg(n),
 			when: n.getProperty("when"),
-			says: n.children?.findNodesByName("say").map((s) => ({
-				text: arg(s, 0),
-				voice: arg(s, 1),
+			says: n.children?.findNodesByName("say").map((n) => ({
+				line: n.getProperty("line"),
+				voice: n.getProperty("voice"),
+				image: n.getProperty("image"),
 			})),
 		})),
 	};
@@ -141,5 +144,5 @@ function load<T>(
 }
 
 export const loadCharacter = (path: string) =>
-	load(path, readCharacter, Character);
+	load(path, readCharacter, CharacterSchema);
 export const loadMetric = (path: string) => load(path, readMetric, Metric);

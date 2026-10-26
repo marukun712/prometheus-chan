@@ -1,3 +1,5 @@
+import { staticPlugin } from "@elysia/static";
+import { Elysia } from "elysia";
 import type { Character, Metric } from "./config.ts";
 import { query } from "./prometheus.ts";
 
@@ -5,8 +7,12 @@ type Message = {
 	part: string;
 	text: string;
 	voice?: string;
+	image?: string;
+	level?: string;
 	time: number;
 };
+
+type Line = Omit<Message, "time">;
 
 const textEncoder = new TextEncoder();
 
@@ -16,14 +22,16 @@ export class CharacterRunner {
 	private levelState = new Map<string, string>();
 	private eventState = new Map<string, number>();
 	private messageListeners = new Set<(message: Message) => void>();
+	private lastMessage: Message | null = null;
 
 	constructor(charConf: Character, metricConf: Metric) {
 		this.charConf = charConf;
 		this.metricConf = metricConf;
 	}
 
-	private publish(part: string, text: string, voice: string | undefined) {
-		const message: Message = { part, text, voice, time: Date.now() };
+	private publish(line: Line) {
+		const message: Message = { ...line, time: Date.now() };
+		this.lastMessage = message;
 		for (const listener of this.messageListeners) {
 			listener(message);
 		}
@@ -62,28 +70,47 @@ export class CharacterRunner {
 		return level.voices[Math.floor(Math.random() * level.voices.length)];
 	}
 
-	private say(part: string, from: string, to: string) {
-		for (const event of this.charConf.events) {
+	// レベルごとのデフォルト立ち絵
+	private levelImage(levelName: string): string | undefined {
+		const level = this.charConf.levels.find((l) => l.name === levelName);
+		return level?.image;
+	}
+
+	private say(part: string, from: string, to: string): Line | null {
+		for (const event of this.charConf.on) {
 			if (event.part !== part) continue;
 			if (event.to !== to) continue;
 			if (!event.from.includes("*") && !event.from.includes(from)) continue;
 
-			// say行にボイスが設定されている場合はそのボイスを使う
+			// say行の立ち絵/音声上書きがある場合はそれを使用
 			const line = event.says[Math.floor(Math.random() * event.says.length)];
 			const voice = line.voice ?? this.levelVoice(to);
-			return { part, text: line.text, voice };
+			const image = line.image ?? this.levelImage(to);
+			return {
+				part,
+				text: line.line,
+				voice,
+				level: to,
+				image,
+			};
 		}
 		return null;
 	}
 
-	private react(part: string, when: "rise" | "fall") {
-		for (const reaction of this.charConf.reactions) {
+	private react(part: string, when: "rise" | "fall"): Line | null {
+		for (const reaction of this.charConf.react) {
 			if (reaction.event !== part) continue;
 			if (reaction.when !== when) continue;
 
+			// reactにはデフォルト立ち絵は設定できないため、say行で立ち絵が定義されている場合のみ含まれる
 			const line =
 				reaction.says[Math.floor(Math.random() * reaction.says.length)];
-			return { part, text: line.text, voice: line.voice };
+			return {
+				part,
+				text: line.line,
+				voice: line.voice,
+				image: line.image,
+			};
 		}
 		return null;
 	}
@@ -99,10 +126,10 @@ export class CharacterRunner {
 		this.levelState.set(part, after);
 		if (before === after) return;
 
-		const from = before ?? after;
-		const text = this.say(part, from, after);
-		if (!text) return;
-		this.publish(text.part, text.text, text.voice);
+		const from = before ?? this.charConf.levels[0].name;
+		const line = this.say(part, from, after);
+		if (!line) return;
+		this.publish(line);
 	}
 
 	private tickEvent(part: string, value: number) {
@@ -115,7 +142,7 @@ export class CharacterRunner {
 		const reaction = this.react(part, when);
 		if (!reaction) return;
 
-		this.publish(reaction.part, reaction.text, reaction.voice);
+		this.publish(reaction);
 	}
 
 	private async tick() {
@@ -124,12 +151,11 @@ export class CharacterRunner {
 			if (res.data.resultType !== "vector") continue;
 			const sample = res.data.result[0]?.value;
 
-			console.log(signal, sample);
-
 			if (!sample) continue;
 			const value = Number(sample[1]);
+			console.log(signal, value);
 
-			if (this.charConf.eventParts.includes(signal.part)) {
+			if (this.charConf.events.includes(signal.part)) {
 				this.tickEvent(signal.part, value);
 			} else {
 				this.tickLevel(signal.part, value);
@@ -137,41 +163,7 @@ export class CharacterRunner {
 		}
 	}
 
-	private handleState(): Response {
-		const levels: Record<string, string> = {};
-		for (const [part, level] of this.levelState) {
-			levels[part] = level;
-		}
-		const events: Record<string, number> = {};
-		for (const [part, value] of this.eventState) {
-			events[part] = value;
-		}
-		return Response.json(
-			{ levels, events },
-			{ headers: { "access-control-allow-origin": "*" } },
-		);
-	}
-
-	private handleStatic(pathname: string): Response {
-		const relative = pathname.slice("/static/".length);
-		try {
-			const root = Deno.realPathSync("./static");
-			const path = Deno.realPathSync(`./static/${relative}`);
-			if (!path.startsWith(root)) {
-				return new Response("not found", { status: 404 });
-			}
-			return new Response(Deno.readFileSync(path), {
-				headers: {
-					"content-type": "audio/wav",
-					"access-control-allow-origin": "*",
-				},
-			});
-		} catch {
-			return new Response("not found", { status: 404 });
-		}
-	}
-
-	private handleMessages(): Response {
+	private messages(): Response {
 		let listener: (message: Message) => void;
 		const stream = new ReadableStream({
 			start: (controller) => {
@@ -180,6 +172,7 @@ export class CharacterRunner {
 						textEncoder.encode(`data: ${JSON.stringify(message)}\n\n`),
 					);
 				};
+				if (this.lastMessage) listener(this.lastMessage);
 				this.messageListeners.add(listener);
 			},
 			cancel: () => {
@@ -187,10 +180,7 @@ export class CharacterRunner {
 			},
 		});
 		return new Response(stream, {
-			headers: {
-				"content-type": "text/event-stream",
-				"access-control-allow-origin": "*",
-			},
+			headers: { "content-type": "text/event-stream" },
 		});
 	}
 
@@ -203,14 +193,11 @@ export class CharacterRunner {
 			}
 		}, Number(this.metricConf.prometheus.interval));
 
-		Deno.serve({ port: this.metricConf.server.port }, (req) => {
-			const url = new URL(req.url);
-			if (url.pathname === "/state") return this.handleState();
-			if (url.pathname === "/messages") return this.handleMessages();
-			if (url.pathname.startsWith("/static/")) {
-				return this.handleStatic(url.pathname);
-			}
-			return new Response("not found", { status: 404 });
-		});
+		const app = new Elysia()
+			.get("/messages", () => this.messages())
+			.use(staticPlugin({ assets: "static", prefix: "/static" }))
+			.use(staticPlugin({ assets: "dist", prefix: "/" }));
+
+		Deno.serve({ port: this.metricConf.server.port }, app.fetch);
 	}
 }

@@ -12,82 +12,28 @@ import type * as PIXI from "pixi.js";
 import { Viewport } from "pixi-viewport";
 import { z } from "zod";
 
-type Level = "ok" | "hard" | "critical";
-
-type Tier = {
-	breathAmount: number;
-	breathDuration: number;
-	lookAmount: number;
-	lookDuration: number;
-};
-
-type AnimState = {
-	depth: { lift: Pose; neutral: Pose; left: Pose; right: Pose };
-	t: { breath: number; look: number };
-};
-
-const API_BASE = new URL("http://localhost:3000");
-
-const LEVEL_ORDER: Level[] = ["ok", "hard", "critical"];
-
-function isLevel(value: string): value is Level {
-	return (LEVEL_ORDER as string[]).includes(value);
-}
-
-const IMAGE_FOR_LEVEL: Record<Level, string> = {
-	ok: "./images/normal.png",
-	hard: "./images/hard.png",
-	critical: "./images/critical.png",
-};
-
-const DEPTH_IMAGE_FOR_LEVEL: Record<Level, string> = {
-	ok: "./images/normal_depth.png",
-	hard: "./images/hard_depth.png",
-	critical: "./images/critical_depth.png",
-};
-
-const TIER: Record<Level, Tier> = {
-	ok: {
-		breathAmount: 8,
-		breathDuration: 2.4,
-		lookAmount: 12,
-		lookDuration: 6,
-	},
-	hard: {
-		breathAmount: 12,
-		breathDuration: 3.6,
-		lookAmount: 8,
-		lookDuration: 10,
-	},
-	critical: {
-		breathAmount: 16,
-		breathDuration: 4.8,
-		lookAmount: 4,
-		lookDuration: 16,
-	},
-};
-
-const State = z.object({
-	levels: z.record(z.string(), z.string()),
-	events: z.record(z.string(), z.number()),
-});
-
 const Message = z.object({
 	part: z.string(),
 	text: z.string(),
 	voice: z.string().optional(),
+	image: z.string().optional(),
+	level: z.string().optional(),
 	time: z.number(),
 });
 type Message = z.infer<typeof Message>;
 
-// 一番状態が悪いパーツのレベルを取得する
-function worstLevel(levels: Record<string, string>): Level {
-	let worst: Level = "ok";
-	for (const value of Object.values(levels)) {
-		if (!isLevel(value)) continue;
-		if (LEVEL_ORDER.indexOf(value) > LEVEL_ORDER.indexOf(worst)) worst = value;
-	}
-	return worst;
+const animConf = {
+	breathAmount: 8,
+	breathDuration: 2.4,
+	lookAmount: 12,
+	lookDuration: 6,
+};
+
+const levels = ["ok", "hard", "critical"];
+
+function depthPath(image: string) {
+	const dot = image.lastIndexOf(".");
+	return `${image.slice(0, dot)}_depth${image.slice(dot)}`;
 }
 
 const NEUTRAL: Pose = () => ({ tx: 0, ty: 0 });
@@ -103,16 +49,16 @@ function sidePose(amount: number): Pose {
 	return () => ({ tx: amount, ty: 0 });
 }
 
-function createAnimState(
-	tier: Tier,
+function createTemplate(
+	level: number,
 	depthFunc: (u: number, v: number) => number,
-): AnimState {
+) {
 	const depth = injectDepthToPose(
 		{
-			lift: liftPose(tier.breathAmount * 2),
+			lift: liftPose(animConf.breathAmount * level),
 			neutral: NEUTRAL,
-			left: sidePose(-tier.lookAmount),
-			right: sidePose(tier.lookAmount),
+			left: sidePose(-animConf.lookAmount / level),
+			right: sidePose(animConf.lookAmount / level),
 		},
 		depthFunc,
 	);
@@ -120,7 +66,7 @@ function createAnimState(
 	const breath = { amount: 0 };
 	gsap.to(breath, {
 		amount: 1,
-		duration: tier.breathDuration / 2,
+		duration: (animConf.breathDuration / 2) * level,
 		ease: "sine.inOut",
 		repeat: -1,
 		yoyo: true,
@@ -129,7 +75,7 @@ function createAnimState(
 	const look = { amount: 0 };
 	gsap.to(look, {
 		amount: 1,
-		duration: tier.lookDuration / 2,
+		duration: animConf.lookDuration / 2 / level,
 		ease: "sine.inOut",
 		repeat: -1,
 		yoyo: true,
@@ -175,7 +121,7 @@ const voicePlayer = new Audio();
 
 async function playVoice(voice: string) {
 	try {
-		const res = await fetch(new URL(`/static/${voice}`, API_BASE));
+		const res = await fetch(`/static/${voice}`);
 		if (!res.ok) return;
 		const blob = await res.blob();
 		voicePlayer.src = URL.createObjectURL(blob);
@@ -186,7 +132,7 @@ async function playVoice(voice: string) {
 }
 
 function listenMessages(onMessage: (message: Message) => void) {
-	const source = new EventSource(new URL("/messages", API_BASE).toString());
+	const source = new EventSource("/messages");
 	source.onmessage = (ev) => {
 		onMessage(Message.parse(JSON.parse(ev.data)));
 	};
@@ -207,23 +153,8 @@ function appendChatMessage(log: HTMLElement, message: Message) {
 	log.scrollTop = log.scrollHeight;
 }
 
-function pollState(onLevel: (level: Level) => void) {
-	async function tick() {
-		try {
-			const res = await fetch(new URL("/state", API_BASE));
-			if (res.ok) {
-				const state = State.parse(await res.json());
-				onLevel(worstLevel(state.levels));
-			}
-		} catch (e) {
-			console.error(e);
-		}
-		setTimeout(tick, 3000);
-	}
-	tick();
-}
-
 async function main() {
+	let level: number = 1;
 	const stage = document.getElementById("stage");
 	if (!stage) return;
 
@@ -243,51 +174,39 @@ async function main() {
 	app.stage.addChild(viewport);
 	viewport.drag().pinch().wheel();
 
-	const characters = new Map<
-		Level,
-		Awaited<ReturnType<typeof loadCharacterImage>>
-	>();
-	const animations = new Map<Level, AnimState>();
-	for (const level of LEVEL_ORDER) {
-		const character = await loadCharacterImage(
-			IMAGE_FOR_LEVEL[level],
-			DEPTH_IMAGE_FOR_LEVEL[level],
-			app.renderer,
-		);
-		character.container.visible = false;
-		viewport.addChild(character.container);
-		characters.set(level, character);
-		animations.set(level, createAnimState(TIER[level], character.depthFunc));
-	}
-
-	let currentLevel: Level = LEVEL_ORDER[0];
-	const first = characters.get(currentLevel);
-	if (first) first.container.visible = true;
-
-	function setLevel(level: Level) {
-		if (level === currentLevel) return;
-		const prev = characters.get(currentLevel);
-		if (prev) prev.container.visible = false;
-		const next = characters.get(level);
-		if (next) next.container.visible = true;
-		currentLevel = level;
-	}
+	const path = `/static/images/normal.png`;
+	const result = await loadCharacterImage(path, depthPath(path), app.renderer);
+	let container = result.container;
+	let rig = result.rig;
+	let template = createTemplate(level, result.depthFunc);
+	viewport.addChild(container);
 
 	app.ticker.add(() => {
-		const character = characters.get(currentLevel);
-		const anim = animations.get(currentLevel);
-		if (!character || !anim) return;
-
-		character.rig.apply([
-			lerpPose(anim.depth.neutral, anim.depth.lift, anim.t.breath),
-			lerpPose(anim.depth.left, anim.depth.right, anim.t.look),
+		rig.apply([
+			lerpPose(template.depth.neutral, template.depth.lift, template.t.breath),
+			lerpPose(template.depth.left, template.depth.right, template.t.look),
 		]);
 	});
 
-	pollState(setLevel);
-	listenMessages((message) => {
+	listenMessages(async (message) => {
 		appendChatMessage(chatLog, message);
 		if (message.voice) playVoice(message.voice);
+		if (message.level) {
+			level = levels.indexOf(message.level) + 1;
+		}
+		if (message.image) {
+			const path = `/static/${message.image}`;
+			const result = await loadCharacterImage(
+				path,
+				depthPath(path),
+				app.renderer,
+			);
+			viewport.removeChildren();
+			container = result.container;
+			rig = result.rig;
+			template = createTemplate(level, result.depthFunc);
+			viewport.addChild(container);
+		}
 	});
 }
 
