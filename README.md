@@ -121,7 +121,7 @@ care "head" level="critical" {
 - conf/character/kiritan/home-router.kdl ... 家庭用VLANとサーバー用VLANがある家庭環境向けホームルーター監視キャラクター
 
 メトリクス
-- conf/metrics/node/ix2215.kdl ... UNIVERGE IX2215の監視。IF-MIBとルーターのプライベートMIBが必要
+- conf/metrics/ix2215.kdl ... UNIVERGE IX2215の監視。IF-MIBとルーターのプライベートMIBが必要
 - conf/metrics/node_exporter.kdl ... node_exporterを使った監視
 
 # License
