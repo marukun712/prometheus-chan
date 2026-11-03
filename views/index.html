@@ -9,6 +9,15 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic&display=swap" rel="stylesheet">
   <style>
+    :root {
+      --edge: 20px;
+      --actions-height: 62px;
+      --panel-border: #f0c4d2;
+      --panel-bg: #fffafb;
+      --panel-shadow: 0 6px 20px rgba(190, 140, 160, 0.25);
+      --panel-text: #5a4a51;
+    }
+
     html,
     body {
       margin: 0;
@@ -23,13 +32,15 @@
 
     #state {
       position: fixed;
-      left: 20px;
-      top: 20px;
+      left: var(--edge);
+      top: var(--edge);
+      max-width: calc(100vw - var(--edge) * 2);
       display: flex;
-      gap: 18px;
-      font-size: 20px;
+      flex-wrap: wrap;
+      gap: 12px 26px;
+      font-size: clamp(18px, 2.2vw, 26px);
       line-height: 1.5;
-      text-shadow: 0 0 4px #ffffff;
+      text-shadow: 0 0 6px #ffffff, 0 0 12px #ffffff;
     }
 
     #state button {
@@ -45,44 +56,64 @@
 
     #actions {
       position: fixed;
-      left: 20px;
-      bottom: 20px;
+      left: var(--edge);
+      bottom: var(--edge);
       display: flex;
       gap: 10px;
     }
 
     #actions button {
-      padding: 10px 18px;
-      border: 2px solid #f0c4d2;
+      padding: 13px 24px;
+      border: 2px solid var(--panel-border);
       border-radius: 14px;
-      background-color: #fffafb;
-      box-shadow: 0 6px 20px rgba(190, 140, 160, 0.25);
+      background-color: var(--panel-bg);
+      box-shadow: var(--panel-shadow);
       font-family: inherit;
-      font-size: 14px;
-      color: #5a4a51;
+      font-size: 17px;
+      color: var(--panel-text);
       cursor: pointer;
+    }
+
+    #care {
+      position: fixed;
+      z-index: 1;
+      left: var(--edge);
+      bottom: calc(var(--edge) + var(--actions-height));
+      width: min(380px, calc(100vw - var(--edge) * 2));
+      max-height: 44vh;
+      overflow-y: auto;
+      box-sizing: border-box;
+      margin: 0;
+      padding: 16px 18px 16px 36px;
+      border: 2px solid var(--panel-border);
+      border-radius: 18px;
+      background-color: var(--panel-bg);
+      box-shadow: var(--panel-shadow);
+      font-size: 17px;
+      line-height: 1.7;
+      color: var(--panel-text);
     }
 
     #chat {
       position: fixed;
-      right: 20px;
-      bottom: 20px;
-      width: 320px;
-      max-height: 50vh;
+      right: var(--edge);
+      bottom: var(--edge);
+      width: min(400px, calc(100vw - var(--edge) * 2));
+      max-height: 46vh;
       display: flex;
       flex-direction: column;
       box-sizing: border-box;
-      padding: 14px;
-      border: 2px solid #f0c4d2;
+      padding: 16px;
+      border: 2px solid var(--panel-border);
       border-radius: 18px;
-      background-color: #fffafb;
-      box-shadow: 0 6px 20px rgba(190, 140, 160, 0.25);
-      color: #5a4a51;
+      background-color: var(--panel-bg);
+      box-shadow: var(--panel-shadow);
+      color: var(--panel-text);
     }
 
     #chat-title {
-      margin: 0 0 10px;
-      font-size: 13px;
+      margin: 0 0 12px;
+      font-size: 15px;
       font-weight: 600;
       letter-spacing: 0.08em;
       color: #c9798f;
@@ -96,44 +127,50 @@
     }
 
     #chat-log li {
-      padding: 9px 13px;
+      padding: 11px 15px;
       border: 1px solid #f6dde4;
       border-radius: 14px 14px 14px 4px;
       background-color: #ffffff;
-      font-size: 14px;
-      line-height: 1.6;
+      font-size: 17px;
+      line-height: 1.7;
     }
 
+    #care li+li,
     #chat-log li+li {
-      margin-top: 8px;
+      margin-top: 10px;
     }
 
     #chat-log time {
       display: block;
-      margin-top: 4px;
-      font-size: 11px;
+      margin-top: 5px;
+      font-size: 13px;
       color: #bda0aa;
     }
 
-    #care {
-      position: fixed;
-      left: 20px;
-      bottom: 76px;
-      width: 300px;
-      box-sizing: border-box;
-      margin: 0;
-      padding: 14px 14px 14px 32px;
-      border: 2px solid #f0c4d2;
-      border-radius: 18px;
-      background-color: #fffafb;
-      box-shadow: 0 6px 20px rgba(190, 140, 160, 0.25);
-      font-size: 14px;
-      line-height: 1.6;
-      color: #5a4a51;
-    }
+    @media (max-width: 760px) {
+      :root {
+        --edge: 14px;
+      }
 
-    #care li+li {
-      margin-top: 6px;
+      #state {
+        gap: 10px 20px;
+      }
+
+      #care,
+      #chat {
+        left: var(--edge);
+        right: var(--edge);
+        width: auto;
+      }
+
+      #chat {
+        bottom: calc(var(--edge) + var(--actions-height));
+        max-height: 34vh;
+      }
+
+      #care {
+        max-height: 40vh;
+      }
     }
   </style>
 </head>

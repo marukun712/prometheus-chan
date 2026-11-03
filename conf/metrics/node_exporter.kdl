@@ -1,26 +1,8 @@
 prometheus url="http://localhost:9090" interval="10000"
 server port=3000
-signal "head" {
-    query "1 - avg(rate(node_cpu_seconds_total{mode=\"idle\"}[5m]))"
-}
-signal "hands" {
-    query "max(1 - node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)"
-}
-signal "memory" {
-    query "max(1 - node_filesystem_avail_bytes{mountpoint=\"/\"} / node_filesystem_size_bytes{mountpoint=\"/\"})"
-}
-signal "ears" {
-    query "rate(node_network_receive_bytes_total{device!~\"lo|veth.*|docker.*|br-.*\"}[5m]) / node_network_speed_bytes"
-}
-signal "mouth" {
-    query "rate(node_network_transmit_bytes_total{device!~\"lo|veth.*|docker.*|br-.*\"}[5m]) / node_network_speed_bytes"
-}
-signal "temperature" {
-    query "node_hwmon_temp_celsius / 100"
-}
-signal "visitor" {
-    query "(sum(node_logind_sessions{class=\"user\", remote=\"true\"}) or vector(0)) > bool 0"
-}
-signal "oom-kill" {
-    query "(sum(increase(node_vmstat_oom_kill[5m])) or vector(0)) > bool 0"
-}
+query "head" "1 - avg(rate(node_cpu_seconds_total{mode=\"idle\"}[5m]))"
+query "hands" "max(1 - node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)"
+query "memory" "max(1 - node_filesystem_avail_bytes{mountpoint=\"/\"} / node_filesystem_size_bytes{mountpoint=\"/\"})"
+query "ears" "rate(node_network_receive_bytes_total{device!~\"lo|veth.*|docker.*|br-.*\"}[5m]) / node_network_speed_bytes"
+query "mouth" "rate(node_network_transmit_bytes_total{device!~\"lo|veth.*|docker.*|br-.*\"}[5m]) / node_network_speed_bytes"
+query "temperature" "node_hwmon_temp_celsius / 100"

@@ -9,16 +9,18 @@ const childArg = (n: Node | undefined, name: string) =>
 const SaysSchema = z.array(
 	z.object({
 		line: z.string(),
-		voice: z.string().optional(),
-		image: z.string().optional(),
+		voice: z.string(),
+		image: z.string(),
 	}),
 );
+
+const DEFAULT_IMAGE = "images/default.png";
 
 const readSays = (n: Node | undefined) =>
 	n?.children?.findNodesByName("say").map((s) => ({
 		line: s.getProperty("line"),
 		voice: s.getProperty("voice"),
-		image: s.getProperty("image"),
+		image: s.getProperty("image") ?? DEFAULT_IMAGE,
 	}));
 
 const LevelListSchema = z.string().transform((s) => s.split(","));
@@ -33,8 +35,6 @@ export const PackSchema = z.object({
 			color: z.string(),
 			enter: z.number(),
 			exit: z.number().optional(),
-			voices: z.array(z.string()),
-			image: z.string(),
 		}),
 	),
 });
@@ -51,8 +51,6 @@ function readPack(doc: Document) {
 			color: childArg(n, "color"),
 			enter: n.getProperty("enter"),
 			exit: n.getProperty("exit"),
-			voices: n.children?.findNodesByName("voice").map((v) => arg(v)) ?? [],
-			image: childArg(n, "image"),
 		})),
 	};
 }
@@ -83,17 +81,6 @@ export const ProfileSchema = z.object({
 			),
 		}),
 	),
-	events: z.array(
-		z.object({
-			id: z.string(),
-			react: z.array(
-				z.object({
-					when: z.enum(["rise", "fall"]),
-					says: SaysSchema,
-				}),
-			),
-		}),
-	),
 });
 export type Profile = z.infer<typeof ProfileSchema>;
 
@@ -117,14 +104,6 @@ function readProfile(doc: Document) {
 				n.children?.findNodesByName("care").map((c) => ({
 					level: c.getProperty("level"),
 					line: c.getProperty("line"),
-				})) ?? [],
-		})),
-		events: doc.findNodesByName("event").map((n) => ({
-			id: arg(n),
-			react:
-				n.children?.findNodesByName("react").map((c) => ({
-					when: c.getProperty("when"),
-					says: readSays(c),
 				})) ?? [],
 		})),
 	};
@@ -158,9 +137,9 @@ function readMetric(doc: Document) {
 		server: {
 			port: s?.getProperty("port"),
 		},
-		signals: doc.findNodesByName("signal").map((n) => ({
-			part: arg(n),
-			query: childArg(n, "query"),
+		signals: doc.findNodesByName("query").map((n) => ({
+			part: arg(n, 0),
+			query: arg(n, 1),
 		})),
 	};
 }

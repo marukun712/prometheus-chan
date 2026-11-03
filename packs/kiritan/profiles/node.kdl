@@ -131,22 +131,3 @@ part "temperature" "体温" {
     }
     care level="hard,critical" line="暑くて溶けそうです。風くらい通してもらえませんか"
 }
-event "visitor" {
-    react when="rise" {
-        say line="こんにちは" voice="voices/こんにちは.wav"
-        say line="こんばんは" voice="voices/こんばんは.wav"
-        say line="おはようございます" voice="voices/おはようございます.wav"
-        say line="おかえりなさい" voice="voices/おかえりなさい.wav"
-    }
-    react when="fall" {
-        say line="いってらっしゃい" voice="voices/いってらっしゃい.wav"
-        say line="さようなら..." voice="voices/さようなら　寂しい.wav"
-        say line="へばな。" voice="voices/へばな。.wav"
-    }
-}
-event "oom-kill" {
-    react when="rise" {
-        say line="持ちきれなくて、何か落としちゃいました" voice="voices/うわぁ…….wav"
-        say line="すみません、取り落としました" voice="voices/ぁっ.wav"
-    }
-}

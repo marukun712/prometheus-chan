@@ -39,23 +39,7 @@ part "wan-tx" "外への発送" {
         say line="発送が詰まってます" voice="voices/だめです.wav"
     }
 }
-part "wan-link" "外への道" {
-    on from="*" to="critical" {
-        say line="外への道が通れません。郵便が出せません" voice="voices/あー、もう！.wav"
-        say line="外への道が切れてます" voice="voices/うわぁ…….wav"
-    }
-    on from="critical" to="ok" {
-        say line="外への道、また通れるようになりました" voice="voices/やりました！.wav"
-    }
-    ask level="ok" {
-        say line="外への道、ちゃんと通れます" voice="voices/そうです　相槌.wav"
-    }
-    ask level="critical" {
-        say line="外への道が通れません" voice="voices/ガーン.wav"
-    }
-    care level="critical" line="外への道が通れません。わたしは出かけたくないので、見てきてもらえませんか"
-}
-part "home-rx" "おうちからの集荷" {
+part "lan-rx" "おうちからの集荷" {
     on from="*" to="hard" {
         say line="おうちから出す郵便、たくさん預かってます" voice="voices/はあ…….wav"
     }
@@ -75,7 +59,7 @@ part "home-rx" "おうちからの集荷" {
         say line="おうちからの集荷が止まりません" voice="voices/ううう…….wav"
     }
 }
-part "home-tx" "おうちへの配達" {
+part "lan-tx" "おうちへの配達" {
     on from="*" to="hard" {
         say line="おうちへの配達が忙しくなってきました" voice="voices/もう….wav"
     }
@@ -94,76 +78,6 @@ part "home-tx" "おうちへの配達" {
     ask level="critical" {
         say line="おうちへの配達が追いつきません" voice="voices/ひっ.wav"
     }
-}
-part "home-link" "おうちへの道" {
-    on from="*" to="critical" {
-        say line="おうちに配達に行けません。道がふさがってるみたいです" voice="voices/ガーン.wav"
-    }
-    on from="critical" to="ok" {
-        say line="おうちへの道、通れるようになりました。配達再開しますね" voice="voices/やりまーす.wav"
-    }
-    ask level="ok" {
-        say line="おうちへの道、通れます" voice="voices/はい.wav"
-    }
-    ask level="critical" {
-        say line="おうちへの道がふさがってます" voice="voices/いや…….wav"
-    }
-    care level="critical" line="おうちへの道がふさがってます。確認してきてください"
-}
-part "server-rx" "サーバーさんからの集荷" {
-    on from="*" to="hard" {
-        say line="サーバーさんから発送の依頼がいっぱいです" voice="voices/ぅっ.wav"
-    }
-    on from="*" to="critical" {
-        say line="サーバーさんからの依頼、さばききれません" voice="voices/無理です.wav"
-    }
-    on from="hard,critical" to="ok" {
-        say line="サーバーさんからの依頼、落ち着いてきました" voice="voices/よしっ.wav"
-    }
-    ask level="ok" {
-        say line="サーバーさんからの依頼、落ち着いてます" voice="voices/そうです　相槌.wav"
-    }
-    ask level="hard" {
-        say line="サーバーさんからの依頼が増えてます" voice="voices/ぅっ.wav"
-    }
-    ask level="critical" {
-        say line="サーバーさんからの依頼、さばききれません" voice="voices/無理です.wav"
-    }
-}
-part "server-tx" "サーバーさんへの配達" {
-    on from="*" to="hard" {
-        say line="サーバーさん宛ての郵便が増えてます" voice="voices/はあ…….wav"
-    }
-    on from="*" to="critical" {
-        say line="サーバーさんへの配達が滞ってます" voice="voices/まったく…….wav"
-    }
-    on from="hard,critical" to="ok" {
-        say line="サーバーさんへの配達、順調です" voice="voices/あはは！.wav"
-    }
-    ask level="ok" {
-        say line="サーバーさんへの配達、順調です" voice="voices/よしっ.wav"
-    }
-    ask level="hard" {
-        say line="サーバーさん宛ての郵便が増えてます" voice="voices/はあ…….wav"
-    }
-    ask level="critical" {
-        say line="サーバーさんへの配達が滞ってます" voice="voices/まったく…….wav"
-    }
-}
-part "server-link" "サーバーさんへの道" {
-    on from="*" to="critical" {
-        say line="サーバーさんのところに行けなくなりました" voice="voices/いや…….wav"
-    }
-    on from="critical" to="ok" {
-        say line="サーバーさんへの道、復旧しました" voice="voices/ありがとうございます　興奮.wav"
-    }
-    ask level="ok" {
-        say line="サーバーさんへの道、通れます" voice="voices/はい.wav"
-    }
-    ask level="critical" {
-        say line="サーバーさんのところに行けません" voice="voices/うわぁ…….wav"
-    }
-    care level="critical" line="サーバーさんのところに行けません。これ、わたしのせいじゃないですよ"
 }
 part "head" "頭" {
     on from="*" to="hard" {
@@ -227,16 +141,4 @@ part "temp" "体温" {
         say line="あついです。ふらふらします" voice="voices/ふえ…….wav"
     }
     care level="hard,critical" line="暑いです。涼しくしてもらえないと、そのうち倒れますよ"
-}
-event "wan-rx-spike" {
-    react when="rise" {
-        say line="外から急に郵便がどっさり届きました" voice="voices/あぁっ！.wav"
-        say line="外から急に郵便が増えてます" voice="voices/え？.wav"
-    }
-}
-event "wan-tx-spike" {
-    react when="rise" {
-        say line="外への発送が急に増えてます。大きな荷物でしょうか" voice="voices/え？.wav"
-        say line="外への発送が急に増えました。急いで出してます" voice="voices/ぁっ.wav"
-    }
 }

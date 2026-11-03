@@ -15,9 +15,9 @@ import { z } from "zod";
 const Message = z.object({
 	part: z.string(),
 	text: z.string(),
-	voice: z.string().optional(),
-	image: z.string().optional(),
-	level: z.string().optional(),
+	voice: z.string(),
+	image: z.string(),
+	level: z.string(),
 	time: z.number(),
 });
 type Message = z.infer<typeof Message>;
@@ -37,7 +37,6 @@ const State = z.object({
 		}),
 	),
 	levelState: z.record(z.string(), z.string()),
-	eventState: z.record(z.string(), z.number()),
 });
 type State = z.infer<typeof State>;
 

@@ -30,6 +30,7 @@ deno task runner kiritan/node node_exporter.kdl
 | `deno task runner` | サーバーを起動 |
 | `deno task check` | 型チェックとBiomeによる整形 |
 | `deno task fmt` | `conf/`と`packs/`以下のKDLを整形 |
+| `deno task loadtest` | 負荷テスト用のダミーexporterを9100番で起動 |
 
 ## Pack
 
@@ -70,19 +71,16 @@ packs/kiritan/
 ```kdl
 prometheus url="http://10.0.0.1:9020" interval="10000"
 server port=3000
-signal "head" {
-    query "1 - avg(rate(node_cpu_seconds_total{mode=\"idle\"}[5m]))"
-}
+query "head" "1 - avg(rate(node_cpu_seconds_total{mode=\"idle\"}[5m]))"
 ```
 
 | ノード | 説明 |
 | --- | --- |
 | `prometheus` | `url`はPrometheusのベースURL、`interval`は取得間隔(ミリ秒) |
 | `server` | `port`はサーバーのポート |
-| `signal "<part>"` | 部位またはイベントに割り当てるクエリ。`query`にPromQLを書く |
+| `query "<part>" "<promql>"` | 部位に割り当てるクエリ。1つめの引数が部位のID、2つめがPromQL |
 
 クエリは`instant query`として実行され、最初の結果の値だけを使います。レベル判定に使うので、0.0から1.0の割合になるように書くのがおすすめです。
-イベントとして扱うシグナルは、`> bool`などで0/1になるように書きます。
 
 ### pack.kdl
 
@@ -96,14 +94,10 @@ levels {
     ok enter=0.0 {
         label "ふつう"
         color "#4a8f6f"
-        voice "voices/はい.wav"
-        image "images/default.png"
     }
     hard enter=0.6 exit=0.5 {
         label "すこし疲れています"
         color "#c88a2e"
-        voice "voices/はあ…….wav"
-        image "images/default.png"
     }
 }
 ```
@@ -111,14 +105,14 @@ levels {
 | ノード | 説明 |
 | --- | --- |
 | `character "<id>"` | キャラクターのID。子に`name`で表示名 |
-| `levels` | 子ノードの名前がレベル名になる。`enter`はそのレベルに入る値、`exit`は抜ける値(省略可)。子に`label`(表示名)、`color`(表示色)、`voice`(既定のボイス、複数可)、`image`(既定の立ち絵) |
+| `levels` | 子ノードの名前がレベル名になる。`enter`はそのレベルに入る値、`exit`は抜ける値(省略可)。子に`label`(表示名)、`color`(表示色) |
 
 `enter`と`exit`の両方を書くと、値が`exit`以上`enter`未満のあいだは現在のレベルに留まります。
 しきい値の前後で値が揺れたときにレベルが行き来するのを防げます。
 
 ### profiles
 
-部位とイベント、それぞれのセリフを定義します。セリフは対象の部位またはイベントの子として書きます。
+部位ごとのセリフを定義します。セリフは対象の部位の子として書きます。
 
 ```kdl
 part "head" "頭" {
@@ -130,11 +124,6 @@ part "head" "頭" {
     }
     care level="critical" line="考えることが多すぎます。何か止めてください"
 }
-event "visitor" {
-    react when="rise" {
-        say line="こんにちは" voice="voices/こんにちは.wav"
-    }
-}
 ```
 
 | ノード | 説明 |
@@ -143,20 +132,19 @@ event "visitor" {
 | `on` | レベル遷移時のセリフ。`from`は遷移元(カンマ区切り、`*`ですべて)、`to`は遷移先 |
 | `ask` | 部位をクリックしたときの返事。`level`は対象のレベル(カンマ区切り、`*`ですべて) |
 | `care` | おせわの要望。`level`は対象のレベル(カンマ区切り)、`line`はテキスト |
-| `event "<id>"` | イベントとして扱うシグナルのID。子に`react`を書く |
-| `react` | イベントへの反応。`when`は`rise`(値の上昇)または`fall`(値の下降) |
 
-`on`、`ask`、`react`の子に書く`say`は、候補のなかからランダムに1つ選ばれます。
-`line`がセリフ、`voice`と`image`はそのセリフだけのボイスと立ち絵で、省略するとレベルの既定値が使われます。
+`on`と`ask`の子に書く`say`は、候補のなかからランダムに1つ選ばれます。
+`line`がセリフ、`voice`と`image`はそのセリフのボイスと立ち絵です。`voice`は必須です。
+`image`は省略できて、省略すると`images/default.png`が使われます。
 
-`part`の`<id>`と`event`の`<id>`は、メトリクス側の`signal "<part>"`と対応させます。
+`part`の`<id>`は、メトリクス側の`query "<part>"`と対応させます。
 
 ## サンプル
 
 パック
 - packs/kiritan ... 東北きりたんのパック
   - profiles/node.kdl ... node_exporter向けのプロファイル
-  - profiles/home-router.kdl ... 家庭用VLANとサーバー用VLANがある家庭環境向けホームルーター監視プロファイル
+  - profiles/home-router.kdl ... WANとLANの通信量を見るホームルーター監視プロファイル
 
 メトリクス
 - conf/metrics/ix2215.kdl ... UNIVERGE IX2215の監視。IF-MIBとルーターのプライベートMIBが必要

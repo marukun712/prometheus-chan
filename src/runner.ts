@@ -6,9 +6,9 @@ import { query } from "./prometheus.ts";
 type Message = {
 	part: string;
 	text: string;
-	voice?: string;
-	image?: string;
-	level?: string;
+	voice: string;
+	image: string;
+	level: string;
 	time: number;
 };
 
@@ -21,25 +21,20 @@ function pick<T>(items: T[]): T {
 }
 
 export class CharacterRunner {
-	private packDir: string;
+	private assetsDir: string;
 	private pack: Pack;
 	private profile: Profile;
-	private metricConf: Metric;
+	private metric: Metric;
+
 	private levelState = new Map<string, string>();
-	private eventState = new Map<string, number>();
 	private messageListeners = new Set<(message: Message) => void>();
 	private lastMessage: Message | null = null;
 
-	constructor(
-		packDir: string,
-		pack: Pack,
-		profile: Profile,
-		metricConf: Metric,
-	) {
-		this.packDir = packDir;
+	constructor(assetsDir: string, pack: Pack, profile: Profile, metric: Metric) {
+		this.assetsDir = assetsDir;
 		this.pack = pack;
 		this.profile = profile;
-		this.metricConf = metricConf;
+		this.metric = metric;
 	}
 
 	private publish(line: Line) {
@@ -76,56 +71,22 @@ export class CharacterRunner {
 		return this.levelForValue(value);
 	}
 
-	// レベルごとにボイスをランダム選択
-	private levelVoice(levelName: string): string | undefined {
-		const level = this.pack.levels.find((l) => l.name === levelName);
-		if (!level || level.voices.length === 0) return undefined;
-		return level.voices[Math.floor(Math.random() * level.voices.length)];
-	}
-
-	// レベルごとのデフォルト立ち絵
-	private levelImage(levelName: string): string | undefined {
-		const level = this.pack.levels.find((l) => l.name === levelName);
-		return level?.image;
-	}
-
 	private say(part: string, from: string, to: string): Line | null {
 		const entry = this.profile.parts.find((p) => p.id === part);
 		if (!entry) return null;
 
 		for (const transition of entry.on) {
 			if (transition.to !== to) continue;
-			if (!transition.from.includes("*") && !transition.from.includes(from))
+			if (!transition.from.includes("*") && !transition.from.includes(from)) {
 				continue;
+			}
 
-			// say行の立ち絵/音声上書きがある場合はそれを使用
 			const line = pick(transition.says);
-			const voice = line.voice ?? this.levelVoice(to);
-			const image = line.image ?? this.levelImage(to);
 			return {
 				part,
 				text: line.line,
-				voice,
-				level: to,
-				image,
-			};
-		}
-		return null;
-	}
-
-	private react(event: string, when: "rise" | "fall"): Line | null {
-		const entry = this.profile.events.find((e) => e.id === event);
-		if (!entry) return null;
-
-		for (const reaction of entry.react) {
-			if (reaction.when !== when) continue;
-
-			// reactにはデフォルト立ち絵は設定できないため、say行で立ち絵が定義されている場合のみ含まれる
-			const line = pick(reaction.says);
-			return {
-				part: event,
-				text: line.line,
 				voice: line.voice,
+				level: to,
 				image: line.image,
 			};
 		}
@@ -141,8 +102,9 @@ export class CharacterRunner {
 		if (!entry) return null;
 
 		for (const answer of entry.ask) {
-			if (!answer.level.includes("*") && !answer.level.includes(level))
+			if (!answer.level.includes("*") && !answer.level.includes(level)) {
 				continue;
+			}
 
 			const line = pick(answer.says);
 			return {
@@ -197,22 +159,9 @@ export class CharacterRunner {
 		this.publish(line);
 	}
 
-	private tickEvent(part: string, value: number) {
-		const before = this.eventState.get(part) ?? 0;
-		this.eventState.set(part, value);
-		if (before === value) return;
-
-		// 値の上昇/下降の判定
-		const when = value > before ? "rise" : "fall";
-		const reaction = this.react(part, when);
-		if (!reaction) return;
-
-		this.publish(reaction);
-	}
-
 	private async tick() {
-		for (const signal of this.metricConf.signals) {
-			const res = await query(signal.query, this.metricConf.prometheus.url);
+		for (const signal of this.metric.signals) {
+			const res = await query(signal.query, this.metric.prometheus.url);
 			if (res.data.resultType !== "vector") continue;
 			const sample = res.data.result[0]?.value;
 
@@ -220,11 +169,7 @@ export class CharacterRunner {
 			const value = Number(sample[1]);
 			console.log(signal, value);
 
-			if (this.profile.events.some((e) => e.id === signal.part)) {
-				this.tickEvent(signal.part, value);
-			} else {
-				this.tickLevel(signal.part, value);
-			}
+			this.tickLevel(signal.part, value);
 		}
 	}
 
@@ -240,7 +185,6 @@ export class CharacterRunner {
 				label: part.label,
 			})),
 			levelState: Object.fromEntries(this.levelState),
-			eventState: Object.fromEntries(this.eventState),
 		};
 	}
 
@@ -272,23 +216,22 @@ export class CharacterRunner {
 			} catch (e) {
 				console.error(e);
 			}
-		}, Number(this.metricConf.prometheus.interval));
+		}, Number(this.metric.prometheus.interval));
 
 		const app = new Elysia()
 			.get("/messages", () => this.messages())
 			.get("/state", () => this.state())
 			.get("/ask", (ctx) => this.ask(ctx.query.part))
 			.get("/care", () => this.care())
-			// 日本語のファイル名を扱うため、URLのデコードを有効にする
 			.use(
 				staticPlugin({
-					assets: this.packDir,
+					assets: this.assetsDir,
 					prefix: "/pack",
 					decodeURI: true,
 				}),
 			)
 			.use(staticPlugin({ assets: "dist", prefix: "/" }));
 
-		Deno.serve({ port: this.metricConf.server.port }, app.fetch);
+		Deno.serve({ port: this.metric.server.port }, app.fetch);
 	}
 }
