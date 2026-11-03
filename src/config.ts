@@ -1,88 +1,59 @@
 import type { Document, Node } from "@bgotink/kdl";
 import { parseCompat } from "@bgotink/kdl/v1-compat";
-import { z } from "zod";
+import type { z } from "zod";
+import { MetricSchema, PackSchema, ProfileSchema } from "./schema.ts";
 
 const arg = (n: Node | undefined, i = 0) => n?.getArgument(i);
 const childArg = (n: Node | undefined, name: string) =>
 	arg(n?.children?.findNodeByName(name));
 
-const SaysSchema = z.array(
-	z.object({
-		line: z.string(),
-		voice: z.string(),
-		image: z.string(),
-	}),
-);
-
-const DEFAULT_IMAGE = "images/default.png";
+const readSeq = (n: Node | undefined) =>
+	n?.children?.findNodesByName("pose").map((p) => {
+		const lerp = p.getProperty("lerp");
+		return {
+			pose:
+				lerp === undefined
+					? p.getProperty("pose")
+					: { lerp: String(lerp).split(","), t: p.getProperty("t") },
+			duration: p.getProperty("duration"),
+		};
+	}) ?? [];
 
 const readSays = (n: Node | undefined) =>
 	n?.children?.findNodesByName("say").map((s) => ({
 		line: s.getProperty("line"),
 		voice: s.getProperty("voice"),
-		image: s.getProperty("image") ?? DEFAULT_IMAGE,
+		move: s.getProperty("move"),
 	}));
-
-const LevelListSchema = z.string().transform((s) => s.split(","));
-
-export const PackSchema = z.object({
-	id: z.string(),
-	name: z.string(),
-	levels: z.array(
-		z.object({
-			name: z.string(),
-			label: z.string(),
-			color: z.string(),
-			enter: z.number(),
-			exit: z.number().optional(),
-		}),
-	),
-});
-export type Pack = z.infer<typeof PackSchema>;
 
 function readPack(doc: Document) {
 	const character = doc.findNodeByName("character");
 	return {
 		id: arg(character),
 		name: childArg(character, "name"),
+		psd: childArg(character, "psd"),
+		groups: doc.findNodesByName("group").map((n) => ({
+			name: arg(n),
+			layers: n.children?.findNodeByName("layer")?.getArguments() ?? [],
+		})),
+		moves: doc.findNodesByName("move").map((n) => ({
+			name: arg(n),
+			groups:
+				n.children?.findNodesByName("group").map((l) => ({
+					name: arg(l),
+					seq: readSeq(l),
+				})) ?? [],
+		})),
 		levels: doc.findNodeByName("levels")?.children?.nodes.map((n) => ({
 			name: n.getName(),
 			label: childArg(n, "label"),
 			color: childArg(n, "color"),
+			move: childArg(n, "move"),
 			enter: n.getProperty("enter"),
 			exit: n.getProperty("exit"),
 		})),
 	};
 }
-
-export const ProfileSchema = z.object({
-	parts: z.array(
-		z.object({
-			id: z.string(),
-			label: z.string(),
-			on: z.array(
-				z.object({
-					from: LevelListSchema,
-					to: z.string(),
-					says: SaysSchema,
-				}),
-			),
-			ask: z.array(
-				z.object({
-					level: LevelListSchema,
-					says: SaysSchema,
-				}),
-			),
-			care: z.array(
-				z.object({
-					level: LevelListSchema,
-					line: z.string(),
-				}),
-			),
-		}),
-	),
-});
-export type Profile = z.infer<typeof ProfileSchema>;
 
 function readProfile(doc: Document) {
 	return {
@@ -108,23 +79,6 @@ function readProfile(doc: Document) {
 		})),
 	};
 }
-
-export const Metric = z.object({
-	prometheus: z.object({
-		url: z.string(),
-		interval: z.string(),
-	}),
-	server: z.object({
-		port: z.number(),
-	}),
-	signals: z.array(
-		z.object({
-			part: z.string(),
-			query: z.string(),
-		}),
-	),
-});
-export type Metric = z.infer<typeof Metric>;
 
 function readMetric(doc: Document) {
 	const p = doc.findNodeByName("prometheus");
@@ -162,4 +116,5 @@ function load<T>(
 export const loadPack = (path: string) => load(path, readPack, PackSchema);
 export const loadProfile = (path: string) =>
 	load(path, readProfile, ProfileSchema);
-export const loadMetric = (path: string) => load(path, readMetric, Metric);
+export const loadMetric = (path: string) =>
+	load(path, readMetric, MetricSchema);

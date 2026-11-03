@@ -1,5 +1,15 @@
-character "tohoku-kiritan" {
-    name "東北きりたん"
+character "default" {
+    name "デフォルト"
+    psd "images/seethrough.psd"
+}
+group "hair" {
+    layer "front hair" "back hair"
+}
+move "nod" {
+    group "hair" {
+        pose lerp="up,down" t=0 duration=0.3
+        pose lerp="up,down" t=0.5 duration=0.3
+    }
 }
 levels {
     ok enter=0.0 {

@@ -1,138 +1,85 @@
 import {
-	drawPNG,
-	getMeshPosition,
-	lerpPose,
+	type Animation,
+	byName,
+	drawPSD,
+	groupNodes,
+	loop,
+	or,
 	type Pose,
 	Rig,
+	resolveSeqExpr,
+	type SpriteNode,
 	setupCanvas,
+	walkPSD,
+	withParent,
 } from "@kokoro/rig";
-import { extractDepth, injectDepthToPose, uvToDepth } from "@kokoro/rig/depth";
-import gsap from "gsap";
-import type * as PIXI from "pixi.js";
+import { Container } from "pixi.js";
 import { Viewport } from "pixi-viewport";
 import { z } from "zod";
+import {
+	type Group as GroupConf,
+	type Message,
+	MessageSchema,
+	type Move as MoveConf,
+	type State,
+	StateSchema,
+} from "../src/schema.ts";
+import { HAIR_TEMPLATE, POSE_TEMPLATE } from "./template.ts";
 
-const Message = z.object({
-	part: z.string(),
-	text: z.string(),
-	voice: z.string(),
-	image: z.string(),
-	level: z.string(),
-	time: z.number(),
-});
-type Message = z.infer<typeof Message>;
+const meshVertices = 100;
 
-const State = z.object({
-	levels: z.array(
-		z.object({
-			name: z.string(),
-			label: z.string(),
-			color: z.string(),
-		}),
-	),
-	parts: z.array(
-		z.object({
-			id: z.string(),
-			label: z.string(),
-		}),
-	),
-	levelState: z.record(z.string(), z.string()),
-});
-type State = z.infer<typeof State>;
-
-const animConf = {
-	breathAmount: 8 * 3,
-	breathDuration: 2.4,
-	lookAmount: 12 * 5,
-	lookDuration: 6,
+// KDLのposeはこのテンプレートを名前で参照する
+const poseTemplate: Record<string, Pose> = {
+	...POSE_TEMPLATE(),
+	...HAIR_TEMPLATE,
 };
 
-const levels = ["ok", "hard", "critical"];
+// グループ宣言に出てこないレイヤーをまとめたものがbody
+const bodyGroup = "body";
 
-function depthPath(image: string) {
-	const dot = image.lastIndexOf(".");
-	return `${image.slice(0, dot)}_depth${image.slice(dot)}`;
-}
-
-const NEUTRAL: Pose = () => ({ tx: 0, ty: 0 });
-
-function liftPose(amount: number): Pose {
-	return (u: number, v: number) => {
-		const { fromTop } = getMeshPosition(u, v);
-		return { tx: 0, ty: -amount * Math.sin(fromTop * Math.PI) };
-	};
-}
-
-function sidePose(amount: number): Pose {
-	return () => ({ tx: amount, ty: 0 });
-}
-
-function createTemplate(
-	level: number,
-	depthFunc: (u: number, v: number) => number,
-) {
-	const depth = injectDepthToPose(
-		{
-			lift: liftPose(animConf.breathAmount * level),
-			neutral: NEUTRAL,
-			left: sidePose(-animConf.lookAmount / level),
-			right: sidePose(animConf.lookAmount / level),
-		},
-		depthFunc,
+function makeAnims(move: MoveConf): Map<string, Animation> {
+	return new Map(
+		move.groups.map((group) => [
+			group.name,
+			loop(
+				resolveSeqExpr(poseTemplate, group.seq),
+				group.seq.reduce((sum, clip) => sum + clip.duration, 0),
+			),
+		]),
 	);
-
-	const breath = { amount: 0 };
-	gsap.to(breath, {
-		amount: 1,
-		duration: (animConf.breathDuration / 2) * level,
-		ease: "sine.inOut",
-		repeat: -1,
-		yoyo: true,
-	});
-
-	const look = { amount: 0 };
-	gsap.to(look, {
-		amount: 1,
-		duration: animConf.lookDuration / 2 / level,
-		ease: "sine.inOut",
-		repeat: -1,
-		yoyo: true,
-	});
-
-	return {
-		depth: {
-			lift: depth.lift,
-			neutral: depth.neutral,
-			left: depth.left,
-			right: depth.right,
-		},
-		t: {
-			get breath() {
-				return breath.amount;
-			},
-			get look() {
-				return look.amount;
-			},
-		},
-	};
 }
 
-async function loadCharacterImage(
-	url: string,
-	depthUrl: string,
-	renderer: PIXI.Renderer,
-) {
-	const nodes = await drawPNG(url);
-	const rig = new Rig(nodes);
+function makeBodyRig(nodes: SpriteNode[], groups: GroupConf[]): Rig {
+	const grouped = new Set(groups.flatMap((group) => group.layers));
+	return new Rig(nodes.filter((node) => !grouped.has(node.name)));
+}
 
-	const depthNodes = await drawPNG(depthUrl);
-	const { data, width, height } = extractDepth(
-		depthNodes[0].container,
-		renderer,
-	);
-	const depthFunc = uvToDepth(data, width, height);
+function makeGroupRigs(
+	nodes: SpriteNode[],
+	groups: GroupConf[],
+): Map<string, Rig> {
+	const rigs = new Map<string, Rig>();
+	for (const group of groups) {
+		const matched = groupNodes(nodes, or(...group.layers.map(byName)));
+		if (matched.nodes.length > 0) rigs.set(group.name, new Rig(matched.nodes));
+	}
+	return rigs;
+}
 
-	return { container: nodes[0].container, rig, depthFunc };
+function levelMove(state: State): string | undefined {
+	const current = state.parts.map((part) => state.levelState[part.id]);
+	return state.levels.filter((level) => current.includes(level.name)).at(-1)
+		?.move;
+}
+
+async function loadCharacter(url: string) {
+	const layers = await walkPSD(url);
+	const nodes = drawPSD(layers, meshVertices, meshVertices);
+
+	const container = new Container();
+	for (const node of nodes) container.addChild(node.container);
+
+	return { container, nodes };
 }
 
 const voicePlayer = new Audio();
@@ -152,7 +99,7 @@ async function playVoice(voice: string) {
 function listenMessages(onMessage: (message: Message) => void) {
 	const source = new EventSource("/messages");
 	source.onmessage = (ev) => {
-		onMessage(Message.parse(JSON.parse(ev.data)));
+		onMessage(MessageSchema.parse(JSON.parse(ev.data)));
 	};
 }
 
@@ -175,7 +122,7 @@ async function fetchState(): Promise<State | null> {
 	try {
 		const res = await fetch("/state");
 		if (!res.ok) return null;
-		return State.parse(await res.json());
+		return StateSchema.parse(await res.json());
 	} catch (e) {
 		console.error(e);
 		return null;
@@ -227,7 +174,6 @@ async function renderCare(view: HTMLElement) {
 }
 
 async function main() {
-	let level: number = 1;
 	const stage = document.getElementById("stage");
 	if (!stage) return;
 
@@ -249,7 +195,8 @@ async function main() {
 	});
 
 	const initialState = await fetchState();
-	if (initialState) renderState(stateView, initialState);
+	if (!initialState) return;
+	renderState(stateView, initialState);
 
 	const app = await setupCanvas(stage);
 
@@ -264,43 +211,48 @@ async function main() {
 	app.stage.addChild(viewport);
 	viewport.drag().pinch().wheel();
 
-	const path = `/pack/images/default.png`;
-	const result = await loadCharacterImage(path, depthPath(path), app.renderer);
-	let container = result.container;
-	let rig = result.rig;
-	let template = createTemplate(level, result.depthFunc);
-	viewport.addChild(container);
+	const character = await loadCharacter(`/pack/${initialState.psd}`);
+	viewport.addChild(character.container);
+
+	const bodyRig = makeBodyRig(character.nodes, initialState.groups);
+	const groupRigs = makeGroupRigs(character.nodes, initialState.groups);
+
+	let anims = new Map<string, Animation>();
+	let startedAt = 0;
+
+	const play = (state: State, name: string | undefined) => {
+		const move = state.moves.find((move) => move.name === name);
+		if (!move) return;
+
+		anims = makeAnims(move);
+		startedAt = performance.now() / 1000;
+	};
+
+	play(initialState, levelMove(initialState));
 
 	app.ticker.add(() => {
-		rig.apply([
-			lerpPose(template.depth.neutral, template.depth.lift, template.t.breath),
-			lerpPose(template.depth.left, template.depth.right, template.t.look),
-		]);
+		const t = performance.now() / 1000 - startedAt;
+		const posesOf = (group: string) => anims.get(group)?.(t) ?? [];
+
+		const bodyPoses = posesOf(bodyGroup);
+		bodyRig.apply(bodyPoses);
+
+		const applyWithBody = withParent(bodyRig, bodyPoses);
+		for (const [name, rig] of groupRigs) {
+			applyWithBody(rig, posesOf(name));
+		}
 	});
 
 	listenMessages(async (message) => {
 		appendChatMessage(chatLog, message);
 
 		const state = await fetchState();
-		if (state) renderState(stateView, state);
+		if (state) {
+			renderState(stateView, state);
+			play(state, message.move ?? levelMove(state));
+		}
 
 		if (message.voice) playVoice(message.voice);
-		if (message.level) {
-			level = levels.indexOf(message.level) + 1;
-		}
-		if (message.image) {
-			const path = `/pack/${message.image}`;
-			const result = await loadCharacterImage(
-				path,
-				depthPath(path),
-				app.renderer,
-			);
-			viewport.removeChildren();
-			container = result.container;
-			rig = result.rig;
-			template = createTemplate(level, result.depthFunc);
-			viewport.addChild(container);
-		}
 	});
 }
 

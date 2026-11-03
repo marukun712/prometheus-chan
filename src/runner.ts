@@ -1,16 +1,7 @@
 import { staticPlugin } from "@elysia/static";
 import { Elysia } from "elysia";
-import type { Metric, Pack, Profile } from "./config.ts";
 import { query } from "./prometheus.ts";
-
-type Message = {
-	part: string;
-	text: string;
-	voice: string;
-	image: string;
-	level: string;
-	time: number;
-};
+import type { Message, Metric, Pack, Profile } from "./schema.ts";
 
 type Line = Omit<Message, "time">;
 
@@ -86,8 +77,8 @@ export class CharacterRunner {
 				part,
 				text: line.line,
 				voice: line.voice,
+				move: line.move,
 				level: to,
-				image: line.image,
 			};
 		}
 		return null;
@@ -111,8 +102,8 @@ export class CharacterRunner {
 				part,
 				text: line.line,
 				voice: line.voice,
+				move: line.move,
 				level,
-				image: line.image,
 			};
 		}
 		return null;
@@ -175,10 +166,14 @@ export class CharacterRunner {
 
 	private state() {
 		return {
+			psd: this.pack.psd,
+			groups: this.pack.groups,
+			moves: this.pack.moves,
 			levels: this.pack.levels.map((level) => ({
 				name: level.name,
 				label: level.label,
 				color: level.color,
+				move: level.move,
 			})),
 			parts: this.profile.parts.map((part) => ({
 				id: part.id,

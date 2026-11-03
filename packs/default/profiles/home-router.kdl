@@ -7,10 +7,10 @@ part "wan-rx" "外から届く郵便" {
         say line="受け取りきれません" voice="voices/あぁっ！.wav"
     }
     on from="hard,critical" to="ok" {
-        say line="外からの郵便、落ち着いてきました" voice="voices/よしっ.wav"
+        say line="外からの郵便、落ち着いてきました" voice="voices/よしっ.wav" move="nod"
     }
     ask level="ok" {
-        say line="外からの郵便、今は落ち着いてます" voice="voices/はい.wav"
+        say line="外からの郵便、今は落ち着いてます" voice="voices/はい.wav" move="nod"
     }
     ask level="hard" {
         say line="外からの郵便がたくさんです。仕分けしてますね" voice="voices/ええっと…….wav"
@@ -27,10 +27,10 @@ part "wan-tx" "外への発送" {
         say line="発送が詰まってます。外への道がいっぱいです" voice="voices/だめです.wav"
     }
     on from="hard,critical" to="ok" {
-        say line="外への発送、落ち着いてきました" voice="voices/えへへ…….wav"
+        say line="外への発送、落ち着いてきました" voice="voices/えへへ…….wav" move="nod"
     }
     ask level="ok" {
-        say line="外への発送、順調です" voice="voices/よしっ.wav"
+        say line="外への発送、順調です" voice="voices/よしっ.wav" move="nod"
     }
     ask level="hard" {
         say line="発送が増えてきました。急いで出してます" voice="voices/もう….wav"
@@ -47,10 +47,10 @@ part "lan-rx" "おうちからの集荷" {
         say line="おうちからの集荷が止まりません。もう抱えきれないです" voice="voices/ううう…….wav"
     }
     on from="hard,critical" to="ok" {
-        say line="おうちからの集荷、ひと段落しました" voice="voices/よしっ.wav"
+        say line="おうちからの集荷、ひと段落しました" voice="voices/よしっ.wav" move="nod"
     }
     ask level="ok" {
-        say line="おうちからの集荷、落ち着いてます" voice="voices/えへへ…….wav"
+        say line="おうちからの集荷、落ち着いてます" voice="voices/えへへ…….wav" move="nod"
     }
     ask level="hard" {
         say line="おうちからの集荷が増えてます" voice="voices/はあ…….wav"
@@ -67,10 +67,10 @@ part "lan-tx" "おうちへの配達" {
         say line="おうちへの配達が追いつきません" voice="voices/ひっ.wav"
     }
     on from="hard,critical" to="ok" {
-        say line="おうちへの配達、落ち着きました" voice="voices/えへへ…….wav"
+        say line="おうちへの配達、落ち着きました" voice="voices/えへへ…….wav" move="nod"
     }
     ask level="ok" {
-        say line="おうちへの配達、順調です" voice="voices/はい.wav"
+        say line="おうちへの配達、順調です" voice="voices/はい.wav" move="nod"
     }
     ask level="hard" {
         say line="おうちへの配達が忙しくなってます" voice="voices/もう….wav"
@@ -87,10 +87,10 @@ part "head" "頭" {
         say line="仕分けの判断が追いつきません。もう限界です" voice="voices/ううう…….wav"
     }
     on from="hard,critical" to="ok" {
-        say line="すっきりしました。もう大丈夫ですよ" voice="voices/あはは！.wav"
+        say line="すっきりしました。もう大丈夫ですよ" voice="voices/あはは！.wav" move="nod"
     }
     ask level="ok" {
-        say line="いまは余裕があります。このくらい、わたしには簡単です" voice="voices/よしっ.wav"
+        say line="いまは余裕があります。このくらい、わたしには簡単です" voice="voices/よしっ.wav" move="nod"
     }
     ask level="hard" {
         say line="仕分けの判断が少し追いつきません" voice="voices/はあ…….wav"
@@ -108,10 +108,10 @@ part "desk" "作業台" {
         say line="作業台がいっぱいで、もう置けません" voice="voices/最低です！.wav"
     }
     on from="hard,critical" to="ok" {
-        say line="作業台、片付きました" voice="voices/よしっ.wav"
+        say line="作業台、片付きました" voice="voices/よしっ.wav" move="nod"
     }
     ask level="ok" {
-        say line="作業台はきれいです" voice="voices/はい.wav"
+        say line="作業台はきれいです" voice="voices/はい.wav" move="nod"
     }
     ask level="hard" {
         say line="作業台が散らかってきました" voice="voices/ちぇっ…….wav"
@@ -129,10 +129,10 @@ part "temp" "体温" {
         say line="暑いです。このままだと倒れちゃいそう" voice="voices/ふえ…….wav"
     }
     on from="hard,critical" to="ok" {
-        say line="涼しくなってきました。生き返ります" voice="voices/えへへ…….wav"
+        say line="涼しくなってきました。生き返ります" voice="voices/えへへ…….wav" move="nod"
     }
     ask level="ok" {
-        say line="体温はふつうです" voice="voices/はい.wav"
+        say line="体温はふつうです" voice="voices/はい.wav" move="nod"
     }
     ask level="hard" {
         say line="ちょっと暑くなってきました" voice="voices/うー.wav"

@@ -8,11 +8,11 @@ part "head" "頭" {
         say line="考えることが多すぎます。もう限界です" voice="voices/ううう…….wav"
     }
     on from="hard,critical" to="ok" {
-        say line="頭がすっきりしました。このくらいがちょうどいいんです" voice="voices/よしっ.wav"
-        say line="ようやく落ち着きました。これなら考えられます" voice="voices/えへへ…….wav"
+        say line="頭がすっきりしました。このくらいがちょうどいいんです" voice="voices/よしっ.wav" move="nod"
+        say line="ようやく落ち着きました。これなら考えられます" voice="voices/えへへ…….wav" move="nod"
     }
     ask level="ok" {
-        say line="いまは余裕があります。なんでも考えられますよ" voice="voices/はい.wav"
+        say line="いまは余裕があります。なんでも考えられますよ" voice="voices/はい.wav" move="nod"
     }
     ask level="hard" {
         say line="考えることが多くて、少し忙しいです" voice="voices/そうです　相槌.wav"
@@ -31,10 +31,10 @@ part "hands" "手" {
         say line="これ以上は抱えられません" voice="voices/だめです.wav"
     }
     on from="hard,critical" to="ok" {
-        say line="手が空きました。身軽になりましたね" voice="voices/やりました！.wav"
+        say line="手が空きました。身軽になりましたね" voice="voices/やりました！.wav" move="nod"
     }
     ask level="ok" {
-        say line="両手はまだ空いてます。何か持ちましょうか" voice="voices/やりまーす.wav"
+        say line="両手はまだ空いてます。何か持ちましょうか" voice="voices/やりまーす.wav" move="nod"
     }
     ask level="hard" {
         say line="だいぶ抱えてますけど、まだ平気です" voice="voices/はい.wav"
@@ -53,10 +53,10 @@ part "memory" "記憶" {
         say line="これ以上は入りません" voice="voices/無理です.wav"
     }
     on from="hard,critical" to="ok" {
-        say line="いろいろ忘れられました。すっきりしました" voice="voices/えへへ…….wav"
+        say line="いろいろ忘れられました。すっきりしました" voice="voices/えへへ…….wav" move="nod"
     }
     ask level="ok" {
-        say line="まだいろんな物を覚えられます" voice="voices/がんばります！.wav"
+        say line="まだいろんな物を覚えられます" voice="voices/がんばります！.wav" move="nod"
     }
     ask level="hard" {
         say line="そろそろ覚えきれなくなってきました" voice="voices/はあ…….wav"
@@ -75,10 +75,10 @@ part "ears" "耳" {
         say line="一度にそんなに話されても、聞き取れません" voice="voices/アホですか！.wav"
     }
     on from="hard,critical" to="ok" {
-        say line="やっと静かになりました。一人ずつ聞けます" voice="voices/よしっ.wav"
+        say line="やっと静かになりました。一人ずつ聞けます" voice="voices/よしっ.wav" move="nod"
     }
     ask level="ok" {
-        say line="今は静かです。ちゃんと聞こえてますよ" voice="voices/そうです　相槌.wav"
+        say line="今は静かです。ちゃんと聞こえてますよ" voice="voices/そうです　相槌.wav" move="nod"
     }
     ask level="hard" {
         say line="いろんな声が届いてて、ちょっと賑やかです" voice="voices/ううう…….wav"
@@ -96,10 +96,10 @@ part "mouth" "口" {
         say line="もう声が出ません。お水ください" voice="voices/ううう…….wav"
     }
     on from="hard,critical" to="ok" {
-        say line="しゃべり疲れました。しばらく静かにしてますね" voice="voices/んっ.wav"
+        say line="しゃべり疲れました。しばらく静かにしてますね" voice="voices/んっ.wav" move="nod"
     }
     ask level="ok" {
-        say line="喉の調子はいいですよ" voice="voices/よしっ.wav"
+        say line="喉の調子はいいですよ" voice="voices/よしっ.wav" move="nod"
     }
     ask level="hard" {
         say line="さっきからよくしゃべってるので、少し喉が疲れました" voice="voices/はあ…….wav"
@@ -118,10 +118,10 @@ part "temperature" "体温" {
         say line="あつすぎます。もう限界です" voice="voices/ひっ.wav"
     }
     on from="hard,critical" to="ok" {
-        say line="ひんやりしてて、落ち着きます" voice="voices/えへへ…….wav"
+        say line="ひんやりしてて、落ち着きます" voice="voices/えへへ…….wav" move="nod"
     }
     ask level="ok" {
-        say line="体温はふつうです。ひんやりしてて気持ちいいです" voice="voices/はい.wav"
+        say line="体温はふつうです。ひんやりしてて気持ちいいです" voice="voices/はい.wav" move="nod"
     }
     ask level="hard" {
         say line="ちょっとぽかぽかしてます" voice="voices/うー.wav"
