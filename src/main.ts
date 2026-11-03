@@ -1,7 +1,17 @@
-import { loadCharacter, loadMetric } from "./config.ts";
+import { loadMetric, loadPack, loadProfile } from "./config.ts";
 import { CharacterRunner } from "./runner.ts";
 
-const character = loadCharacter(`./conf/character/${Deno.args[0]}`);
-const metric = loadMetric(`./conf/metrics/${Deno.args[1]}`);
+const [target, metricFile] = Deno.args;
+const [packName, profileName] = (target ?? "").split("/");
 
-new CharacterRunner(character, metric).start();
+if (!packName || !profileName || !metricFile) {
+	console.error("使い方: deno task runner <pack>/<profile> <metrics>");
+	Deno.exit(1);
+}
+
+const packDir = `./packs/${packName}`;
+const pack = loadPack(`${packDir}/pack.kdl`);
+const profile = loadProfile(`${packDir}/profiles/${profileName}.kdl`);
+const metric = loadMetric(`./conf/metrics/${metricFile}`);
+
+new CharacterRunner(packDir, pack, profile, metric).start();

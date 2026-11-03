@@ -1,0 +1,29 @@
+character "tohoku-kiritan" {
+    name "東北きりたん"
+}
+levels {
+    ok enter=0.0 {
+        label "ふつう"
+        color "#4a8f6f"
+        voice "voices/よしっ.wav"
+        voice "voices/えへへ…….wav"
+        voice "voices/はい.wav"
+        image "images/default.png"
+    }
+    hard enter=0.6 exit=0.5 {
+        label "すこし疲れています"
+        color "#c88a2e"
+        voice "voices/はあ…….wav"
+        voice "voices/もう….wav"
+        voice "voices/ぅっ.wav"
+        image "images/default.png"
+    }
+    critical enter=0.95 exit=0.9 {
+        label "もう限界です"
+        color "#c2453c"
+        voice "voices/あー、もう！.wav"
+        voice "voices/無理です.wav"
+        voice "voices/ううう…….wav"
+        image "images/default.png"
+    }
+}

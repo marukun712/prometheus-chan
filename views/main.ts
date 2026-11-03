@@ -140,7 +140,7 @@ const voicePlayer = new Audio();
 
 async function playVoice(voice: string) {
 	try {
-		const res = await fetch(`/static/${voice}`);
+		const res = await fetch(`/pack/${voice}`);
 		if (!res.ok) return;
 		const blob = await res.blob();
 		voicePlayer.src = URL.createObjectURL(blob);
@@ -265,7 +265,7 @@ async function main() {
 	app.stage.addChild(viewport);
 	viewport.drag().pinch().wheel();
 
-	const path = `/static/images/default.png`;
+	const path = `/pack/images/default.png`;
 	const result = await loadCharacterImage(path, depthPath(path), app.renderer);
 	let container = result.container;
 	let rig = result.rig;
@@ -290,7 +290,7 @@ async function main() {
 			level = levels.indexOf(message.level) + 1;
 		}
 		if (message.image) {
-			const path = `/static/${message.image}`;
+			const path = `/pack/${message.image}`;
 			const result = await loadCharacterImage(
 				path,
 				depthPath(path),

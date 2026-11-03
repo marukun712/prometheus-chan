@@ -21,7 +21,9 @@ const readSays = (n: Node | undefined) =>
 		image: s.getProperty("image"),
 	}));
 
-export const CharacterSchema = z.object({
+const LevelListSchema = z.string().transform((s) => s.split(","));
+
+export const PackSchema = z.object({
 	id: z.string(),
 	name: z.string(),
 	levels: z.array(
@@ -35,49 +37,14 @@ export const CharacterSchema = z.object({
 			image: z.string(),
 		}),
 	),
-	parts: z.array(
-		z.object({
-			id: z.string(),
-			label: z.string(),
-		}),
-	),
-	on: z.array(
-		z.object({
-			part: z.string().optional(),
-			from: z.string().transform((s) => s.split(",")),
-			to: z.string(),
-			says: SaysSchema,
-		}),
-	),
-	events: z.array(z.string()),
-	react: z.array(
-		z.object({
-			event: z.string(),
-			when: z.enum(["rise", "fall"]),
-			says: SaysSchema,
-		}),
-	),
-	ask: z.array(
-		z.object({
-			part: z.string(),
-			level: z.string().transform((s) => s.split(",")),
-			says: SaysSchema,
-		}),
-	),
-	care: z.array(
-		z.object({
-			part: z.string(),
-			level: z.string().transform((s) => s.split(",")),
-			line: z.string(),
-		}),
-	),
 });
-export type Character = z.infer<typeof CharacterSchema>;
+export type Pack = z.infer<typeof PackSchema>;
 
-function readCharacter(doc: Document) {
+function readPack(doc: Document) {
+	const character = doc.findNodeByName("character");
 	return {
-		id: arg(doc.findNodeByName("character")),
-		name: childArg(doc.findNodeByName("character"), "name"),
+		id: arg(character),
+		name: childArg(character, "name"),
 		levels: doc.findNodeByName("levels")?.children?.nodes.map((n) => ({
 			name: n.getName(),
 			label: childArg(n, "label"),
@@ -87,31 +54,78 @@ function readCharacter(doc: Document) {
 			voices: n.children?.findNodesByName("voice").map((v) => arg(v)) ?? [],
 			image: childArg(n, "image"),
 		})),
+	};
+}
+
+export const ProfileSchema = z.object({
+	parts: z.array(
+		z.object({
+			id: z.string(),
+			label: z.string(),
+			on: z.array(
+				z.object({
+					from: LevelListSchema,
+					to: z.string(),
+					says: SaysSchema,
+				}),
+			),
+			ask: z.array(
+				z.object({
+					level: LevelListSchema,
+					says: SaysSchema,
+				}),
+			),
+			care: z.array(
+				z.object({
+					level: LevelListSchema,
+					line: z.string(),
+				}),
+			),
+		}),
+	),
+	events: z.array(
+		z.object({
+			id: z.string(),
+			react: z.array(
+				z.object({
+					when: z.enum(["rise", "fall"]),
+					says: SaysSchema,
+				}),
+			),
+		}),
+	),
+});
+export type Profile = z.infer<typeof ProfileSchema>;
+
+function readProfile(doc: Document) {
+	return {
 		parts: doc.findNodesByName("part").map((n) => ({
 			id: arg(n, 0),
 			label: arg(n, 1),
+			on:
+				n.children?.findNodesByName("on").map((c) => ({
+					from: c.getProperty("from"),
+					to: c.getProperty("to"),
+					says: readSays(c),
+				})) ?? [],
+			ask:
+				n.children?.findNodesByName("ask").map((c) => ({
+					level: c.getProperty("level"),
+					says: readSays(c),
+				})) ?? [],
+			care:
+				n.children?.findNodesByName("care").map((c) => ({
+					level: c.getProperty("level"),
+					line: c.getProperty("line"),
+				})) ?? [],
 		})),
-		on: doc.findNodesByName("on").map((n) => ({
-			part: arg(n),
-			from: n.getProperty("from"),
-			to: n.getProperty("to"),
-			says: readSays(n),
-		})),
-		events: doc.findNodesByName("event").map((n) => arg(n)),
-		react: doc.findNodesByName("react").map((n) => ({
-			event: arg(n),
-			when: n.getProperty("when"),
-			says: readSays(n),
-		})),
-		ask: doc.findNodesByName("ask").map((n) => ({
-			part: arg(n),
-			level: n.getProperty("level"),
-			says: readSays(n),
-		})),
-		care: doc.findNodesByName("care").map((n) => ({
-			part: arg(n),
-			level: n.getProperty("level"),
-			line: childArg(n, "line"),
+		events: doc.findNodesByName("event").map((n) => ({
+			id: arg(n),
+			react:
+				n.children?.findNodesByName("react").map((c) => ({
+					when: c.getProperty("when"),
+					says: readSays(c),
+				})) ?? [],
 		})),
 	};
 }
@@ -166,6 +180,7 @@ function load<T>(
 	return result.data;
 }
 
-export const loadCharacter = (path: string) =>
-	load(path, readCharacter, CharacterSchema);
+export const loadPack = (path: string) => load(path, readPack, PackSchema);
+export const loadProfile = (path: string) =>
+	load(path, readProfile, ProfileSchema);
 export const loadMetric = (path: string) => load(path, readMetric, Metric);
