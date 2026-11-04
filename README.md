@@ -18,12 +18,12 @@ deno task runner <pack>/<profile> <metrics>
 
 ## 開発
 
-| タスク | 内容 |
-| --- | --- |
-| `deno task build` | フロントエンドを`dist/`にバンドル |
-| `deno task runner` | サーバーを起動 |
-| `deno task check` | 型チェックとBiomeによる整形 |
-| `deno task fmt` | `conf/`と`packs/`以下のKDLを整形 |
+| タスク               | 内容                                       |
+| -------------------- | ------------------------------------------ |
+| `deno task build`    | フロントエンドを`dist/`にバンドル          |
+| `deno task runner`   | サーバーを起動                             |
+| `deno task check`    | 型チェックとBiomeによる整形                |
+| `deno task fmt`      | `conf/`と`packs/`以下のKDLを整形           |
 | `deno task loadtest` | 負荷テスト用のダミーexporterを9100番で起動 |
 
 ## サンプル
@@ -38,4 +38,5 @@ deno task runner <pack>/<profile> <metrics>
 - conf/metrics/node_exporter.kdl ... node_exporterを使った監視
 
 # License
+
 本ソフトウェアは、MIT Licenseの元で公開されます。ただし、packs配下のアセットには適用されません。

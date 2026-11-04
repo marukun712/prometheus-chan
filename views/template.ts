@@ -1,9 +1,17 @@
 import { curve, getMeshPosition } from "@kokoro/rig";
 
-export const POSE_TEMPLATE = (scale: number = 1) => ({
-	left: (u: number, v: number) => {
+const headWeight = (fromTop: number) => 0.4 + 0.6 * fromTop;
+
+export const BASE_POSE = {
+	default: () => {
+		return { tx: 0, ty: 0 };
+	},
+};
+
+export const HEAD_POSE = (scale: number = 1) => ({
+	headLeft: (u: number, v: number) => {
 		const { fromTop } = getMeshPosition(u, v);
-		const w = curve.power2(fromTop);
+		const w = headWeight(fromTop);
 
 		return {
 			tx: -100 * w * scale,
@@ -11,9 +19,9 @@ export const POSE_TEMPLATE = (scale: number = 1) => ({
 		};
 	},
 
-	right: (u: number, v: number) => {
+	headRight: (u: number, v: number) => {
 		const { fromTop } = getMeshPosition(u, v);
-		const w = curve.power2(fromTop);
+		const w = headWeight(fromTop);
 
 		return {
 			tx: 100 * w * scale,
@@ -21,9 +29,9 @@ export const POSE_TEMPLATE = (scale: number = 1) => ({
 		};
 	},
 
-	up: (u: number, v: number) => {
+	headUp: (u: number, v: number) => {
 		const { fromTop } = getMeshPosition(u, v);
-		const w = curve.power2(fromTop);
+		const w = headWeight(fromTop);
 
 		return {
 			tx: 0,
@@ -31,9 +39,9 @@ export const POSE_TEMPLATE = (scale: number = 1) => ({
 		};
 	},
 
-	down: (u: number, v: number) => {
+	headDown: (u: number, v: number) => {
 		const { fromTop } = getMeshPosition(u, v);
-		const w = curve.power2(fromTop);
+		const w = headWeight(fromTop);
 
 		return {
 			tx: 0,
@@ -42,54 +50,49 @@ export const POSE_TEMPLATE = (scale: number = 1) => ({
 	},
 });
 
-export const HAIR_TEMPLATE = {
-	leftFront: (u: number, v: number) => {
-		const { fromBottom } = getMeshPosition(u, v);
-
-		return {
-			tx: -50 * fromBottom,
-			ty: 0,
-		};
+export const PART_SHIFT = {
+	shiftLeft: () => {
+		return { tx: -20, ty: 0 };
 	},
-
-	rightFront: (u: number, v: number) => {
-		const { fromBottom } = getMeshPosition(u, v);
-
-		return {
-			tx: 50 * fromBottom,
-			ty: 0,
-		};
+	shiftRight: () => {
+		return { tx: 20, ty: 0 };
 	},
-
-	leftBack: (u: number, v: number) => {
-		const { fromBottom } = getMeshPosition(u, v);
-
-		return {
-			tx: 10 * fromBottom,
-			ty: 0,
-		};
+	shiftUp: () => {
+		return { tx: 0, ty: -20 };
 	},
-
-	rightBack: (u: number, v: number) => {
-		const { fromBottom } = getMeshPosition(u, v);
-
-		return {
-			tx: -10 * fromBottom,
-			ty: 0,
-		};
+	shiftDown: () => {
+		return { tx: 0, ty: 20 };
 	},
 };
 
-export const SWING_TEMPLATE =
-	(t: number, scale: number) => (u: number, v: number) => {
+export const HAIR_SWING = {
+	swingLeft: (u: number, v: number) => {
 		const { fromBottom } = getMeshPosition(u, v);
-		const w = curve.power2(fromBottom);
-		const swing = Math.sin(t);
 
 		return {
 			tx: 0,
 			ty: 0,
-			rot: scale * swing * w,
+			rot: 0.12 * curve.power2(fromBottom),
 			pivot: { u: 0.5, v: 0.0 },
 		};
-	};
+	},
+	swingRight: (u: number, v: number) => {
+		const { fromBottom } = getMeshPosition(u, v);
+
+		return {
+			tx: 0,
+			ty: 0,
+			rot: -0.12 * curve.power2(fromBottom),
+			pivot: { u: 0.5, v: 0.0 },
+		};
+	},
+};
+
+export const BROW_ROLL = {
+	rollLeftDown: () => {
+		return { tx: 0, ty: 0, rot: -0.25, pivot: { u: 0.5, v: 0.5 } };
+	},
+	rollRightDown: () => {
+		return { tx: 0, ty: 0, rot: 0.25, pivot: { u: 0.5, v: 0.5 } };
+	},
+};

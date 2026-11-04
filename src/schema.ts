@@ -1,4 +1,4 @@
-import { AgentSeqSchema } from "@kokoro/rig";
+import { SeqExprSchema } from "@kokoro/rig";
 import { z } from "zod";
 
 const SplitStringSchema = z.string().transform((s) => s.split(","));
@@ -25,10 +25,11 @@ export type Group = z.infer<typeof GroupSchema>;
 
 export const MoveSchema = z.object({
 	name: z.string(),
+	loop: z.boolean().default(false),
 	groups: z.array(
 		z.object({
 			name: z.string(),
-			seq: AgentSeqSchema,
+			seq: SeqExprSchema,
 		}),
 	),
 });

@@ -5,7 +5,6 @@ import {
 	groupNodes,
 	loop,
 	or,
-	type Pose,
 	Rig,
 	resolveSeqExpr,
 	type SpriteNode,
@@ -20,56 +19,65 @@ import {
 	type Group as GroupConf,
 	type Message,
 	MessageSchema,
-	type Move as MoveConf,
 	type State,
 	StateSchema,
 } from "../src/schema.ts";
-import { HAIR_TEMPLATE, POSE_TEMPLATE } from "./template.ts";
+import {
+	BASE_POSE,
+	BROW_ROLL,
+	HAIR_SWING,
+	HEAD_POSE,
+	PART_SHIFT,
+} from "./template.ts";
 
 const meshVertices = 100;
 
-// KDLのposeはこのテンプレートを名前で参照する
-const poseTemplate: Record<string, Pose> = {
-	...POSE_TEMPLATE(),
-	...HAIR_TEMPLATE,
+const poseTemplate = {
+	...BASE_POSE,
+	...HEAD_POSE(),
+	...PART_SHIFT,
+	...HAIR_SWING,
+	...BROW_ROLL,
 };
 
-// グループ宣言に出てこないレイヤーをまとめたものがbody
 const bodyGroup = "body";
 
-function makeAnims(move: MoveConf): Map<string, Animation> {
+function levelMove(state: State): string | undefined {
+	const current = state.parts.map((part) => state.levelState[part.id]);
+	return state.levels.filter((level) => current.includes(level.name)).at(-1)
+		?.move;
+}
+
+function makeAnims(state: State, msg?: string) {
+	const name = msg ? msg : levelMove(state);
+	const move = state.moves.find((move) => move.name === name);
+	if (!move) return null;
 	return new Map(
-		move.groups.map((group) => [
-			group.name,
-			loop(
-				resolveSeqExpr(poseTemplate, group.seq),
-				group.seq.reduce((sum, clip) => sum + clip.duration, 0),
-			),
-		]),
+		move.groups.map((group): [string, Animation] => {
+			const anim = resolveSeqExpr(poseTemplate, group.seq);
+			if (!move.loop) return [group.name, anim];
+
+			let duration = 0;
+			for (const clip of group.seq) {
+				duration += clip.duration;
+			}
+			return [group.name, loop(anim, duration)];
+		}),
 	);
 }
 
-function makeBodyRig(nodes: SpriteNode[], groups: GroupConf[]): Rig {
+function makeBodyRig(nodes: SpriteNode[], groups: GroupConf[]) {
 	const grouped = new Set(groups.flatMap((group) => group.layers));
 	return new Rig(nodes.filter((node) => !grouped.has(node.name)));
 }
 
-function makeGroupRigs(
-	nodes: SpriteNode[],
-	groups: GroupConf[],
-): Map<string, Rig> {
+function makeGroupRigs(nodes: SpriteNode[], groups: GroupConf[]) {
 	const rigs = new Map<string, Rig>();
 	for (const group of groups) {
 		const matched = groupNodes(nodes, or(...group.layers.map(byName)));
 		if (matched.nodes.length > 0) rigs.set(group.name, new Rig(matched.nodes));
 	}
 	return rigs;
-}
-
-function levelMove(state: State): string | undefined {
-	const current = state.parts.map((part) => state.levelState[part.id]);
-	return state.levels.filter((level) => current.includes(level.name)).at(-1)
-		?.move;
 }
 
 async function loadCharacter(url: string) {
@@ -217,29 +225,21 @@ async function main() {
 	const bodyRig = makeBodyRig(character.nodes, initialState.groups);
 	const groupRigs = makeGroupRigs(character.nodes, initialState.groups);
 
-	let anims = new Map<string, Animation>();
-	let startedAt = 0;
+	let currentAnim = makeAnims(initialState) ?? new Map<string, Animation>();
+	let time = 0;
+	let backToLevel: ReturnType<typeof setTimeout> | undefined;
 
-	const play = (state: State, name: string | undefined) => {
-		const move = state.moves.find((move) => move.name === name);
-		if (!move) return;
+	app.ticker.add((ticker) => {
+		time += ticker.deltaMS / 1000;
 
-		anims = makeAnims(move);
-		startedAt = performance.now() / 1000;
-	};
+		const base = currentAnim.get(bodyGroup)?.(time) ?? [];
+		bodyRig.apply(base);
 
-	play(initialState, levelMove(initialState));
+		const applyWithBody = withParent(bodyRig, base);
 
-	app.ticker.add(() => {
-		const t = performance.now() / 1000 - startedAt;
-		const posesOf = (group: string) => anims.get(group)?.(t) ?? [];
-
-		const bodyPoses = posesOf(bodyGroup);
-		bodyRig.apply(bodyPoses);
-
-		const applyWithBody = withParent(bodyRig, bodyPoses);
 		for (const [name, rig] of groupRigs) {
-			applyWithBody(rig, posesOf(name));
+			const rigAnim = currentAnim.get(name);
+			applyWithBody(rig, rigAnim ? rigAnim(time) : []);
 		}
 	});
 
@@ -247,12 +247,34 @@ async function main() {
 		appendChatMessage(chatLog, message);
 
 		const state = await fetchState();
-		if (state) {
-			renderState(stateView, state);
-			play(state, message.move ?? levelMove(state));
-		}
+		if (!state) return;
+		renderState(stateView, state);
 
 		if (message.voice) playVoice(message.voice);
+
+		const anim = makeAnims(state, message.move);
+		if (anim) {
+			currentAnim = anim;
+			time = 0;
+
+			clearTimeout(backToLevel);
+			const move = state.moves.find((move) => move.name === message.move);
+			if (move && !move.loop) {
+				let longest = 0;
+				for (const group of move.groups) {
+					let duration = 0;
+					for (const clip of group.seq) {
+						duration += clip.duration;
+					}
+					longest = Math.max(longest, duration);
+				}
+
+				backToLevel = setTimeout(() => {
+					currentAnim = makeAnims(state) ?? new Map<string, Animation>();
+					time = 0;
+				}, longest * 1000);
+			}
+		}
 	});
 }
 

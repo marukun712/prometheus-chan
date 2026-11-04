@@ -8,4 +8,3 @@ services:
       - --storage.tsdb.retention.time=1h
     volumes:
       - ./loadtest:/loadtest:ro
-

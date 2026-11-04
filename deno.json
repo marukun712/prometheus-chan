@@ -6,12 +6,12 @@
 	"imports": {
 		"@bgotink/kdl": "npm:@bgotink/kdl@^0.4.1",
 		"@elysia/static": "npm:@elysia/static@^1.4.11",
-		"@kokoro/rig": "jsr:@kokoro/rig@^0.10.0",
+		"@kokoro/rig": "jsr:@kokoro/rig@^0.10.2",
 		"elysia": "npm:elysia@^1.4.30",
 		"gsap": "npm:gsap@^3.15.0",
 		"kdlfmt": "npm:kdlfmt@^0.1.7",
 		"pixi-viewport": "npm:pixi-viewport@^6.0.3",
-		"pixi.js": "npm:pixi.js@^8.18.1",
+		"pixi.js": "npm:pixi.js@^8.22.0",
 		"zod": "npm:zod@^4.6.7"
 	},
 	"tasks": {
@@ -21,5 +21,9 @@
 		"fmt": "dx kdlfmt format ./conf ./packs --kdl-version v1",
 		"runner": "deno --allow-read --allow-net --allow-env src/main.ts",
 		"loadtest": "deno run --allow-net loadtest/exporter.ts"
+	},
+	"minimumDependencyAge": {
+		"age": "P1D",
+		"exclude": ["jsr:@kokoro/rig"]
 	}
 }

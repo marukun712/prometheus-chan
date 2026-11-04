@@ -17,8 +17,8 @@ type State = {
 };
 
 const state: State = {
-	cpu: 0.95,
-	memory: 0.8,
+	cpu: 0.7,
+	memory: 0.7,
 	disk: 0.4,
 	rx: 0.05,
 	tx: 0.05,

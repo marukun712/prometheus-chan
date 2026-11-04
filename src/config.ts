@@ -13,9 +13,10 @@ const readSeq = (n: Node | undefined) =>
 		return {
 			pose:
 				lerp === undefined
-					? p.getProperty("pose")
+					? arg(p)
 					: { lerp: String(lerp).split(","), t: p.getProperty("t") },
 			duration: p.getProperty("duration"),
+			ease: p.getProperty("ease"),
 		};
 	}) ?? [];
 
@@ -38,6 +39,7 @@ function readPack(doc: Document) {
 		})),
 		moves: doc.findNodesByName("move").map((n) => ({
 			name: arg(n),
+			loop: n.getProperty("loop"),
 			groups:
 				n.children?.findNodesByName("group").map((l) => ({
 					name: arg(l),
