@@ -1,48 +1,18 @@
-import {
-	type Animation,
-	byName,
-	drawPSD,
-	groupNodes,
-	loop,
-	or,
-	Rig,
-	resolveSeqExpr,
-	type SpriteNode,
-	Switcher,
-	setupCanvas,
-	walkPSD,
-	withParent,
-} from "@kokoro/rig";
-import { Container } from "pixi.js";
-import { Viewport } from "pixi-viewport";
+import type { Animation } from "@kokoro/rig";
 import { z } from "zod";
+import { type Message, MessageSchema, type State } from "../src/schema.ts";
 import {
-	type Group as GroupConf,
-	type Message,
-	MessageSchema,
-	type Move,
-	type State,
-	StateSchema,
-} from "../src/schema.ts";
-import {
-	BASE_POSE,
-	BROW_ROLL,
-	HAIR_SWING,
-	HEAD_POSE,
-	PART_SHIFT,
-} from "./template.ts";
-
-const meshVertices = 50;
-
-const poseTemplate = {
-	...BASE_POSE,
-	...HEAD_POSE(),
-	...PART_SHIFT,
-	...HAIR_SWING,
-	...BROW_ROLL,
-};
-
-const bodyGroup = "body";
+	applyAnim,
+	fetchState,
+	loadCharacter,
+	makeAnims,
+	makeApplyFace,
+	makeBodyRig,
+	makeGroupRigs,
+	seqDuration,
+	setupStage,
+} from "./character.ts";
+import { makeTemplate } from "./template.ts";
 
 function currentLevel(state: State) {
 	const current = state.parts.map((part) => state.levelState[part.id]);
@@ -52,45 +22,6 @@ function currentLevel(state: State) {
 function findMove(state: State, name?: string) {
 	const target = name ?? currentLevel(state)?.move;
 	return state.moves.find((move) => move.name === target);
-}
-
-function makeAnims(move: Move) {
-	return new Map(
-		move.groups.map((group): [string, Animation] => {
-			const anim = resolveSeqExpr(poseTemplate, group.seq);
-			if (!move.loop) return [group.name, anim];
-
-			let duration = 0;
-			for (const clip of group.seq) {
-				duration += clip.duration;
-			}
-			return [group.name, loop(anim, duration)];
-		}),
-	);
-}
-
-function makeBodyRig(nodes: SpriteNode[], groups: GroupConf[]) {
-	const grouped = new Set(groups.flatMap((group) => group.layers));
-	return new Rig(nodes.filter((node) => !grouped.has(node.name)));
-}
-
-function makeGroupRigs(nodes: SpriteNode[], groups: GroupConf[]) {
-	const rigs = new Map<string, Rig>();
-	for (const group of groups) {
-		const matched = groupNodes(nodes, or(...group.layers.map(byName)));
-		if (matched.nodes.length > 0) rigs.set(group.name, new Rig(matched.nodes));
-	}
-	return rigs;
-}
-
-async function loadCharacter(url: string) {
-	const layers = await walkPSD(url);
-	const nodes = drawPSD(layers, meshVertices, meshVertices);
-
-	const container = new Container();
-	for (const node of nodes) container.addChild(node.container);
-
-	return { container, nodes };
 }
 
 const voicePlayer = new Audio();
@@ -129,17 +60,6 @@ function appendChatMessage(log: HTMLElement, message: Message) {
 	log.scrollTop = log.scrollHeight;
 }
 
-async function fetchState(): Promise<State | null> {
-	try {
-		const res = await fetch("/state");
-		if (!res.ok) return null;
-		return StateSchema.parse(await res.json());
-	} catch (e) {
-		console.error(e);
-		return null;
-	}
-}
-
 function renderState(view: HTMLElement, state: State) {
 	view.replaceChildren();
 	for (const part of state.parts) {
@@ -149,13 +69,9 @@ function renderState(view: HTMLElement, state: State) {
 		const level = state.levels.find((l) => l.name === levelName);
 		if (!level) continue;
 
-		const item = document.createElement("button");
-		item.type = "button";
+		const item = document.createElement("span");
 		item.textContent = `${part.label}\n${level.label}`;
 		item.style.color = level.color;
-		item.addEventListener("click", () => {
-			fetch(`/ask?part=${encodeURIComponent(part.id)}`);
-		});
 		view.appendChild(item);
 	}
 }
@@ -207,36 +123,20 @@ async function main() {
 
 	const initialState = await fetchState();
 	if (!initialState) return;
-	renderState(stateView, initialState);
 
-	const app = await setupCanvas(stage);
+	let state = initialState;
+	renderState(stateView, state);
 
-	const viewport = new Viewport({
-		screenWidth: globalThis.innerWidth,
-		screenHeight: globalThis.innerHeight,
-		worldWidth: 1000,
-		worldHeight: 1000,
-		events: app.renderer.events,
-	});
+	const { app, viewport } = await setupStage(stage);
 
-	app.stage.addChild(viewport);
-	viewport.drag().pinch().wheel();
-
-	const character = await loadCharacter(`/pack/${initialState.psd}`);
+	const character = await loadCharacter(`/pack/${state.psd}`);
 	viewport.addChild(character.container);
 
-	const bodyRig = makeBodyRig(character.nodes, initialState.groups);
-	const groupRigs = makeGroupRigs(character.nodes, initialState.groups);
+	const bodyRig = makeBodyRig(character.nodes, state.groups);
+	const groupRigs = makeGroupRigs(character.nodes, state.groups);
 
-	const faces = initialState.faces;
-	const switcher = new Switcher(character.nodes, faces);
-
-	const applyFace = (name: string | undefined) => {
-		if (!name) return;
-		switcher.apply(
-			Object.fromEntries(faces.map((face) => [face, face === name])),
-		);
-	};
+	const template = makeTemplate(bodyRig);
+	const applyFace = makeApplyFace(character.nodes, state.faces);
 
 	let currentAnim = new Map<string, Animation>();
 	let time = 0;
@@ -246,33 +146,33 @@ async function main() {
 		const move = findMove(state, name);
 		if (!move) return undefined;
 
-		currentAnim = makeAnims(move);
+		currentAnim = makeAnims(move, template);
 		time = 0;
 		applyFace(move.face);
 		return move;
 	};
 
-	play(initialState);
+	play(state);
+
+	for (const node of character.nodes) {
+		node.sprite.eventMode = "static";
+		node.sprite.on("pointertap", () => {
+			const level = currentLevel(state);
+			if (level) playVoice(level.voice);
+		});
+	}
 
 	app.ticker.add((ticker) => {
 		time += ticker.deltaMS / 1000;
-
-		const base = currentAnim.get(bodyGroup)?.(time) ?? [];
-		bodyRig.apply(base);
-
-		const applyWithBody = withParent(bodyRig, base);
-
-		for (const [name, rig] of groupRigs) {
-			const rigAnim = currentAnim.get(name);
-			applyWithBody(rig, rigAnim ? rigAnim(time) : []);
-		}
+		applyAnim(currentAnim, time, bodyRig, groupRigs);
 	});
 
 	listenMessages(async (message) => {
 		appendChatMessage(chatLog, message);
 
-		const state = await fetchState();
-		if (!state) return;
+		const next = await fetchState();
+		if (!next) return;
+		state = next;
 		renderState(stateView, state);
 
 		if (message.voice) playVoice(message.voice);
@@ -285,11 +185,7 @@ async function main() {
 
 		let longest = 0;
 		for (const group of move.groups) {
-			let duration = 0;
-			for (const clip of group.seq) {
-				duration += clip.duration;
-			}
-			longest = Math.max(longest, duration);
+			longest = Math.max(longest, seqDuration(group.seq));
 		}
 
 		backToLevel = setTimeout(() => {

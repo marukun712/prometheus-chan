@@ -53,6 +53,7 @@ function readPack(doc: Document) {
 			label: childArg(n, "label"),
 			color: childArg(n, "color"),
 			move: childArg(n, "move"),
+			voice: childArg(n, "voice"),
 			enter: n.getProperty("enter"),
 			exit: n.getProperty("exit"),
 		})),
@@ -68,11 +69,6 @@ function readProfile(doc: Document) {
 				n.children?.findNodesByName("on").map((c) => ({
 					from: c.getProperty("from"),
 					to: c.getProperty("to"),
-					says: readSays(c),
-				})) ?? [],
-			ask:
-				n.children?.findNodesByName("ask").map((c) => ({
-					level: c.getProperty("level"),
 					says: readSays(c),
 				})) ?? [],
 			care:

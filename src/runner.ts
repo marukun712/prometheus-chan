@@ -84,41 +84,6 @@ export class CharacterRunner {
 		return null;
 	}
 
-	// 部位クリック時の返事
-	private askLine(part: string): Line | null {
-		const level = this.levelState.get(part);
-		if (!level) return null;
-
-		const entry = this.profile.parts.find((p) => p.id === part);
-		if (!entry) return null;
-
-		for (const answer of entry.ask) {
-			if (!answer.level.includes("*") && !answer.level.includes(level)) {
-				continue;
-			}
-
-			const line = pick(answer.says);
-			return {
-				part,
-				text: line.line,
-				voice: line.voice,
-				move: line.move,
-				level,
-			};
-		}
-		return null;
-	}
-
-	private ask(part: string | undefined) {
-		if (!part) return { ok: false };
-
-		const line = this.askLine(part);
-		if (!line) return { ok: false };
-
-		this.publish(line);
-		return { ok: true };
-	}
-
 	// 現在のレベルに当てはまるおせわの要望だけを返す
 	private care(): string[] {
 		const lines: string[] = [];
@@ -175,6 +140,7 @@ export class CharacterRunner {
 				label: level.label,
 				color: level.color,
 				move: level.move,
+				voice: level.voice,
 			})),
 			parts: this.profile.parts.map((part) => ({
 				id: part.id,
@@ -217,8 +183,14 @@ export class CharacterRunner {
 		const app = new Elysia()
 			.get("/messages", () => this.messages())
 			.get("/state", () => this.state())
-			.get("/ask", (ctx) => this.ask(ctx.query.part))
 			.get("/care", () => this.care())
+			.get(
+				"/move",
+				async () =>
+					new Response(await Deno.readTextFile("dist/move.html"), {
+						headers: { "content-type": "text/html; charset=utf-8" },
+					}),
+			)
 			.use(
 				staticPlugin({
 					assets: this.assetsDir,

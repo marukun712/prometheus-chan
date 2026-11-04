@@ -8,6 +8,7 @@ export const LevelSchema = z.object({
 	label: z.string(),
 	color: z.string(),
 	move: z.string().optional(),
+	voice: z.string(),
 });
 export type Level = z.infer<typeof LevelSchema>;
 
@@ -68,12 +69,6 @@ export const ProfileSchema = z.object({
 				z.object({
 					from: SplitStringSchema,
 					to: z.string(),
-					says: SaysSchema,
-				}),
-			),
-			ask: z.array(
-				z.object({
-					level: SplitStringSchema,
 					says: SaysSchema,
 				}),
 			),

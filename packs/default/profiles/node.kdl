@@ -1,133 +1,72 @@
 part "head" "頭" {
     on from="*" to="hard" {
-        say line="考えることが増えてきました。少し忙しいです" voice="voices/はあ…….wav" move="tilt"
-        say line="頭のなかが、だいぶ混み合ってきました" voice="voices/ぅっ.wav" move="tilt"
+        say line="考えることが増えてきました。少し忙しいです" voice="voices/はあ…….wav"
     }
     on from="*" to="critical" {
-        say line="頭がぐるぐるして、もう何も考えられません" voice="voices/無理です.wav" move="shake"
-        say line="考えることが多すぎます。もう限界です" voice="voices/ううう…….wav" move="drop"
+        say line="頭がぐるぐるして、もう何も考えられません" voice="voices/疲れました……。今日の会話量、上限オーバーです……。.wav"
     }
     on from="hard,critical" to="ok" {
-        say line="頭がすっきりしました。このくらいがちょうどいいんです" voice="voices/よしっ.wav" move="lift"
-        say line="ようやく落ち着きました。これなら考えられます" voice="voices/えへへ…….wav" move="lift"
-    }
-    ask level="ok" {
-        say line="いまは余裕があります。なんでも考えられますよ" voice="voices/はい.wav" move="nod"
-    }
-    ask level="hard" {
-        say line="考えることが多くて、少し忙しいです" voice="voices/そうです　相槌.wav" move="tilt"
-    }
-    ask level="critical" {
-        say line="今は頭がいっぱいで...後にしてもらえますか" voice="voices/ごめんなさい.wav" move="drop"
+        say line="頭がすっきりしました。このくらいがちょうどいいんです" voice="voices/よしっ.wav"
     }
     care level="critical" line="考えることが多すぎます。何か止めてください。わたし、そんなに器用じゃないです"
 }
 part "hands" "手" {
     on from="*" to="hard" {
-        say line="両手がふさがってきました" voice="voices/あのですね.wav" move="tilt"
+        say line="両手がふさがってきました" voice="voices/はあ…….wav"
     }
     on from="*" to="critical" {
-        say line="もう持てません。何か落としちゃいます" voice="voices/あぁっ！.wav" move="jump"
-        say line="これ以上は抱えられません" voice="voices/だめです.wav" move="shake"
+        say line="もう持てません。何か落としちゃいます" voice="voices/疲れました……。今日の会話量、上限オーバーです……。.wav"
     }
     on from="hard,critical" to="ok" {
-        say line="手が空きました。身軽になりましたね" voice="voices/やりました！.wav" move="lift"
-    }
-    ask level="ok" {
-        say line="両手はまだ空いてます。何か持ちましょうか" voice="voices/やりまーす.wav" move="lift"
-    }
-    ask level="hard" {
-        say line="だいぶ抱えてますけど、まだ平気です" voice="voices/はい.wav" move="nod"
-    }
-    ask level="critical" {
-        say line="手がふさがってて、動けないです" voice="voices/ぅっ.wav" move="drop"
+        say line="手が空きました。身軽になりましたね" voice="voices/よしっ.wav"
     }
     care level="critical" line="両手がふさがったままです。いつまで持たせるんですか"
 }
 part "memory" "記憶" {
     on from="*" to="hard" {
-        say line="覚えることが多くなってきました" voice="voices/もう….wav" move="tilt"
+        say line="覚えることが多くなってきました" voice="voices/はあ…….wav"
     }
     on from="*" to="critical" {
-        say line="もう新しいことは覚えられません" voice="voices/ガーン.wav" move="drop"
-        say line="これ以上は入りません" voice="voices/無理です.wav" move="shake"
+        say line="もう新しいことは覚えられません" voice="voices/疲れました……。今日の会話量、上限オーバーです……。.wav"
     }
     on from="hard,critical" to="ok" {
-        say line="いろいろ忘れられました。すっきりしました" voice="voices/えへへ…….wav" move="lift"
-    }
-    ask level="ok" {
-        say line="まだいろんな物を覚えられます" voice="voices/がんばります！.wav" move="lift"
-    }
-    ask level="hard" {
-        say line="そろそろ覚えきれなくなってきました" voice="voices/はあ…….wav" move="tilt"
-    }
-    ask level="critical" {
-        say line="もう何も入りません。整理してほしいです" voice="voices/まったく…….wav" move="drop"
+        say line="いろいろ忘れられました。すっきりしました" voice="voices/よしっ.wav"
     }
     care level="hard,critical" line="もう何も入りません。いらないものくらい、自分で捨てられませんか"
 }
 part "ears" "耳" {
     on from="*" to="hard" {
-        say line="話しかけられることが増えてきました" voice="voices/ぅっ.wav" move="tilt"
+        say line="話しかけられることが増えてきました" voice="voices/はあ…….wav"
     }
     on from="*" to="critical" {
-        say line="みんな一斉にしゃべらないでください。耳がパンクします" voice="voices/ばかばか！.wav" move="jump"
-        say line="一度にそんなに話されても、聞き取れません" voice="voices/アホですか！.wav" move="shake"
+        say line="みんな一斉にしゃべらないでください。耳がパンクします" voice="voices/疲れました……。今日の会話量、上限オーバーです……。.wav"
     }
     on from="hard,critical" to="ok" {
-        say line="やっと静かになりました。一人ずつ聞けます" voice="voices/よしっ.wav" move="lift"
-    }
-    ask level="ok" {
-        say line="今は静かです。ちゃんと聞こえてますよ" voice="voices/そうです　相槌.wav" move="nod"
-    }
-    ask level="hard" {
-        say line="いろんな声が届いてて、ちょっと賑やかです" voice="voices/ううう…….wav" move="tilt"
-    }
-    ask level="critical" {
-        say line="耳がいっぱいで、うまく聞き取れません" voice="voices/無理です.wav" move="drop"
+        say line="やっと静かになりました。一人ずつ聞けます" voice="voices/よしっ.wav"
     }
     care level="critical" line="一度にそんなに話しかけられても困ります。少し黙ってもらえませんか"
 }
 part "mouth" "口" {
     on from="*" to="hard" {
-        say line="しゃべりすぎて、喉がカラカラです" voice="voices/はあ…….wav" move="tilt"
+        say line="しゃべりすぎて、喉がカラカラです" voice="voices/はあ…….wav"
     }
     on from="*" to="critical" {
-        say line="もう声が出ません。お水ください" voice="voices/ううう…….wav" move="drop"
+        say line="もう声が出ません。お水ください" voice="voices/疲れました……。今日の会話量、上限オーバーです……。.wav"
     }
     on from="hard,critical" to="ok" {
-        say line="しゃべり疲れました。しばらく静かにしてますね" voice="voices/んっ.wav" move="nod"
-    }
-    ask level="ok" {
-        say line="喉の調子はいいですよ" voice="voices/よしっ.wav" move="lift"
-    }
-    ask level="hard" {
-        say line="さっきからよくしゃべってるので、少し喉が疲れました" voice="voices/はあ…….wav" move="tilt"
-    }
-    ask level="critical" {
-        say line="もう声が出なくて..." voice="voices/ごめんなさい.wav" move="drop"
+        say line="しゃべり疲れました。しばらく静かにしてますね" voice="voices/よしっ.wav"
     }
     care level="critical" line="しゃべりすぎて声が出ません。もう休ませてください"
 }
 part "temperature" "体温" {
     on from="*" to="hard" {
-        say line="ちょっとぽかぽかしてきました" voice="voices/うー.wav" move="tilt"
+        say line="ちょっとぽかぽかしてきました" voice="voices/はあ…….wav"
     }
     on from="*" to="critical" {
-        say line="ふらふらします。何か冷たいものをください" voice="voices/あー、もう！.wav" move="drop"
-        say line="あつすぎます。もう限界です" voice="voices/ひっ.wav" move="jump"
+        say line="ふらふらします。何か冷たいものをください" voice="voices/疲れました……。今日の会話量、上限オーバーです……。.wav"
     }
     on from="hard,critical" to="ok" {
-        say line="ひんやりしてて、落ち着きます" voice="voices/えへへ…….wav" move="lift"
-    }
-    ask level="ok" {
-        say line="体温はふつうです。ひんやりしてて気持ちいいです" voice="voices/はい.wav" move="nod"
-    }
-    ask level="hard" {
-        say line="ちょっとぽかぽかしてます" voice="voices/うー.wav" move="tilt"
-    }
-    ask level="critical" {
-        say line="あついです。あまり近づかないほうがいいかもしれません" voice="voices/ふえ…….wav" move="drop"
+        say line="ひんやりしてて、落ち着きます" voice="voices/よしっ.wav"
     }
     care level="hard,critical" line="暑くて溶けそうです。風くらい通してもらえませんか"
 }
