@@ -8,6 +8,7 @@ import {
 	Rig,
 	resolveSeqExpr,
 	type SpriteNode,
+	Switcher,
 	setupCanvas,
 	walkPSD,
 	withParent,
@@ -19,6 +20,7 @@ import {
 	type Group as GroupConf,
 	type Message,
 	MessageSchema,
+	type Move,
 	type State,
 	StateSchema,
 } from "../src/schema.ts";
@@ -30,7 +32,7 @@ import {
 	PART_SHIFT,
 } from "./template.ts";
 
-const meshVertices = 100;
+const meshVertices = 50;
 
 const poseTemplate = {
 	...BASE_POSE,
@@ -42,16 +44,17 @@ const poseTemplate = {
 
 const bodyGroup = "body";
 
-function levelMove(state: State): string | undefined {
+function currentLevel(state: State) {
 	const current = state.parts.map((part) => state.levelState[part.id]);
-	return state.levels.filter((level) => current.includes(level.name)).at(-1)
-		?.move;
+	return state.levels.filter((level) => current.includes(level.name)).at(-1);
 }
 
-function makeAnims(state: State, msg?: string) {
-	const name = msg ? msg : levelMove(state);
-	const move = state.moves.find((move) => move.name === name);
-	if (!move) return null;
+function findMove(state: State, name?: string) {
+	const target = name ?? currentLevel(state)?.move;
+	return state.moves.find((move) => move.name === target);
+}
+
+function makeAnims(move: Move) {
 	return new Map(
 		move.groups.map((group): [string, Animation] => {
 			const anim = resolveSeqExpr(poseTemplate, group.seq);
@@ -225,9 +228,31 @@ async function main() {
 	const bodyRig = makeBodyRig(character.nodes, initialState.groups);
 	const groupRigs = makeGroupRigs(character.nodes, initialState.groups);
 
-	let currentAnim = makeAnims(initialState) ?? new Map<string, Animation>();
+	const faces = initialState.faces;
+	const switcher = new Switcher(character.nodes, faces);
+
+	const applyFace = (name: string | undefined) => {
+		if (!name) return;
+		switcher.apply(
+			Object.fromEntries(faces.map((face) => [face, face === name])),
+		);
+	};
+
+	let currentAnim = new Map<string, Animation>();
 	let time = 0;
 	let backToLevel: ReturnType<typeof setTimeout> | undefined;
+
+	const play = (state: State, name?: string) => {
+		const move = findMove(state, name);
+		if (!move) return undefined;
+
+		currentAnim = makeAnims(move);
+		time = 0;
+		applyFace(move.face);
+		return move;
+	};
+
+	play(initialState);
 
 	app.ticker.add((ticker) => {
 		time += ticker.deltaMS / 1000;
@@ -252,29 +277,24 @@ async function main() {
 
 		if (message.voice) playVoice(message.voice);
 
-		const anim = makeAnims(state, message.move);
-		if (anim) {
-			currentAnim = anim;
-			time = 0;
+		const move = play(state, message.move);
+		if (!move) return;
 
-			clearTimeout(backToLevel);
-			const move = state.moves.find((move) => move.name === message.move);
-			if (move && !move.loop) {
-				let longest = 0;
-				for (const group of move.groups) {
-					let duration = 0;
-					for (const clip of group.seq) {
-						duration += clip.duration;
-					}
-					longest = Math.max(longest, duration);
-				}
+		clearTimeout(backToLevel);
+		if (move.loop) return;
 
-				backToLevel = setTimeout(() => {
-					currentAnim = makeAnims(state) ?? new Map<string, Animation>();
-					time = 0;
-				}, longest * 1000);
+		let longest = 0;
+		for (const group of move.groups) {
+			let duration = 0;
+			for (const clip of group.seq) {
+				duration += clip.duration;
 			}
+			longest = Math.max(longest, duration);
 		}
+
+		backToLevel = setTimeout(() => {
+			play(state);
+		}, longest * 1000);
 	});
 }
 

@@ -12,19 +12,15 @@ type State = {
 	rx: number;
 	tx: number;
 	temperature: number;
-	sessions: number;
-	oomKills: number;
 };
 
 const state: State = {
-	cpu: 0.7,
-	memory: 0.7,
-	disk: 0.4,
-	rx: 0.05,
-	tx: 0.05,
-	temperature: 45,
-	sessions: 0,
-	oomKills: 0,
+	cpu: 0.95,
+	memory: 0.1,
+	disk: 0.1,
+	rx: 0.1,
+	tx: 0.1,
+	temperature: 1,
 };
 
 const stateKeys: (keyof State)[] = [
@@ -34,8 +30,6 @@ const stateKeys: (keyof State)[] = [
 	"rx",
 	"tx",
 	"temperature",
-	"sessions",
-	"oomKills",
 ];
 
 let cpuIdleSeconds = 0;
@@ -125,14 +119,6 @@ function buildMetrics(): string {
 	lines.push(
 		`node_hwmon_temp_celsius{chip="platform_coretemp_0",sensor="temp1"} ${state.temperature}`,
 	);
-
-	lines.push("# TYPE node_logind_sessions gauge");
-	lines.push(
-		`node_logind_sessions{class="user",remote="true",type="tty"} ${state.sessions}`,
-	);
-
-	lines.push("# TYPE node_vmstat_oom_kill untyped");
-	lines.push(`node_vmstat_oom_kill ${state.oomKills}`);
 
 	return `${lines.join("\n")}\n`;
 }

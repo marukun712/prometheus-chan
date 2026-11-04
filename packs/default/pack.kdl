@@ -1,26 +1,27 @@
 character "default" {
     name "デフォルト"
-    psd "images/seethrough.psd"
+    psd "images/character.psd"
 }
+face "default" "tired" "wink" "sad" "angry"
 group "hair" {
-    layer "front hair" "back hair"
+    layer "front_hair" "back_hair"
 }
 group "eyes" {
-    layer "irides-l" "irides-r"
+    layer "iris_L" "iris_R"
 }
 group "brow-l" {
-    layer "eyebrow-l"
+    layer "eyebrow_L"
 }
 group "brow-r" {
-    layer "eyebrow-r"
+    layer "eyebrow_R"
 }
 group "mouth" {
     layer "mouth"
 }
 group "eyewear" {
-    layer "eyewear"
+    layer "glasses"
 }
-move "breathe" loop=true {
+move "breathe" loop=true face="default" {
     group "body" {
         pose lerp="default,headUp" t=0.13 duration=1.5 ease="t^2 * (3 - 2*t)"
         pose lerp="default,headDown" t=0.09 duration=1.3 ease="t^2 * (3 - 2*t)"
@@ -36,7 +37,7 @@ move "breathe" loop=true {
         pose lerp="default,shiftRight" t=0.33 duration=1.22
     }
 }
-move "sway" loop=true {
+move "sway" loop=true face="default" {
     group "body" {
         pose lerp="default,headDown" t=0.22 duration=0.8 ease="t^3"
         pose lerp="default,headUp" t=0.1 duration=0.5 ease="1 - (1-t)^3"
@@ -68,7 +69,7 @@ move "sway" loop=true {
         pose lerp="default,rollLeftDown" t=0.48 duration=0.8 ease="t^2 * (3 - 2*t)"
     }
 }
-move "sink" loop=true {
+move "sink" loop=true face="tired" {
     group "body" {
         pose lerp="default,headDown" t=0.46 duration=0.3 ease="t^3"
         pose lerp="default,headDown" t=0.26 duration=0.2 ease="1 - (1-t)^3"
@@ -116,7 +117,7 @@ move "sink" loop=true {
         pose lerp="default,shiftDown" t=0.35 duration=0.3 ease="1 - (1-t)^3"
     }
 }
-move "nod" {
+move "nod" face="default" {
     group "body" {
         pose lerp="default,headDown" t=0.32 duration=0.32 ease="4.5*t^3 - 3.5*t^2"
         pose "default" duration=0.48 ease="1 - (1-t)^3 * cos(t*14)"
@@ -138,7 +139,7 @@ move "nod" {
         pose "default" duration=0.6 ease="1 - (1-t)^3"
     }
 }
-move "shake" {
+move "shake" face="angry" {
     group "body" {
         pose lerp="default,headLeft" t=0.28 duration=0.17 ease="1 + 4.5*(t-1)^3 + 3.5*(t-1)^2"
         pose lerp="default,headRight" t=0.24 duration=0.17 ease="t^2 * (3 - 2*t)"
@@ -171,7 +172,7 @@ move "shake" {
         pose "default" duration=0.25 ease="1 - (1-t)^3"
     }
 }
-move "tilt" {
+move "tilt" face="tired" {
     group "body" {
         pose lerp="default,headRight" t=0.32 duration=0.4 ease="4.5*t^3 - 3.5*t^2"
         pose lerp="default,headRight" t=0.28 duration=0.6 ease="1 - (1-t)^3 * cos(t*14)"
@@ -200,7 +201,7 @@ move "tilt" {
         pose "default" duration=0.4 ease="1 - (1-t)^3"
     }
 }
-move "lift" {
+move "lift" face="wink" {
     group "body" {
         pose lerp="default,headUp" t=0.36 duration=0.4 ease="4.5*t^3 - 3.5*t^2"
         pose "default" duration=0.5 ease="1 - (1-t)^3 * cos(t*14)"
@@ -222,7 +223,7 @@ move "lift" {
         pose "default" duration=0.5 ease="1 - (1-t)^3 * cos(t*14)"
     }
 }
-move "drop" {
+move "drop" face="sad" {
     group "body" {
         pose lerp="default,headDown" t=0.46 duration=0.42 ease="4.5*t^3 - 3.5*t^2"
         pose lerp="default,headDown" t=0.4 duration=0.88 ease="1 - (1-t)^3 * cos(t*14)"
@@ -254,7 +255,7 @@ move "drop" {
         pose "default" duration=0.5 ease="1 - (1-t)^3"
     }
 }
-move "jump" {
+move "jump" face="angry" {
     group "body" {
         pose lerp="default,headUp" t=0.34 duration=0.12 ease="1 - (1-t)^3"
         pose lerp="default,headRight" t=0.16 duration=0.2 ease="1 - (1-t)^3 * cos(t*14)"

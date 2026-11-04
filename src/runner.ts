@@ -167,6 +167,7 @@ export class CharacterRunner {
 	private state() {
 		return {
 			psd: this.pack.psd,
+			faces: this.pack.faces,
 			groups: this.pack.groups,
 			moves: this.pack.moves,
 			levels: this.pack.levels.map((level) => ({

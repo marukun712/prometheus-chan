@@ -33,6 +33,7 @@ function readPack(doc: Document) {
 		id: arg(character),
 		name: childArg(character, "name"),
 		psd: childArg(character, "psd"),
+		faces: doc.findNodeByName("face")?.getArguments() ?? [],
 		groups: doc.findNodesByName("group").map((n) => ({
 			name: arg(n),
 			layers: n.children?.findNodeByName("layer")?.getArguments() ?? [],
@@ -40,6 +41,7 @@ function readPack(doc: Document) {
 		moves: doc.findNodesByName("move").map((n) => ({
 			name: arg(n),
 			loop: n.getProperty("loop"),
+			face: n.getProperty("face"),
 			groups:
 				n.children?.findNodesByName("group").map((l) => ({
 					name: arg(l),

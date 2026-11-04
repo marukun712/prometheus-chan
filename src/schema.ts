@@ -26,6 +26,7 @@ export type Group = z.infer<typeof GroupSchema>;
 export const MoveSchema = z.object({
 	name: z.string(),
 	loop: z.boolean().default(false),
+	face: z.string().optional(),
 	groups: z.array(
 		z.object({
 			name: z.string(),
@@ -40,6 +41,7 @@ export const PackSchema = z.object({
 	id: z.string(),
 	name: z.string(),
 	psd: z.string(),
+	faces: z.array(z.string()),
 	groups: z.array(GroupSchema),
 	moves: z.array(MoveSchema),
 	levels: z.array(
@@ -115,6 +117,7 @@ export type Message = z.infer<typeof MessageSchema>;
 
 export const StateSchema = z.object({
 	psd: z.string(),
+	faces: z.array(z.string()),
 	groups: z.array(GroupSchema),
 	moves: z.array(MoveSchema),
 	levels: z.array(LevelSchema),
