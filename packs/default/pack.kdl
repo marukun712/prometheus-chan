@@ -1,6 +1,6 @@
 character "default" {
     name "デフォルト"
-    psd "images/character.psd"
+    psd "images/character_props.psd"
 }
 face "default" "tired" "wink" "sad" "angry"
 group "face" {
@@ -23,6 +23,15 @@ group "mouth" {
 }
 group "eyewear" {
     layer "glasses"
+}
+group "steam" {
+    layer "steam"
+}
+group "list" {
+    layer "list"
+}
+group "mail" {
+    layer "mail"
 }
 move "breathe" loop=true {
     group "body" {
@@ -58,6 +67,20 @@ move "breathe" loop=true {
     group "eyewear" {
         pose lerp="neutral,shiftY" t="0.08*tension" duration="2.0 - 1.2*tension" ease="t^3"
         pose "neutral" duration="1.8 - 1.1*tension" ease="1 - (1-t)^3"
+    }
+    group "steam" {
+        pose lerp="neutral,bendX" t=0.8 duration=2.6
+        pose lerp="neutral,bendX" t=-0.5 duration=3.1
+        pose lerp="neutral,bendX" t=0.4 duration=2.3
+        pose lerp="neutral,bendX" t=-0.9 duration=2.8
+    }
+    group "list" {
+        pose lerp="neutral,swing" t="0.12 + 0.3*load" duration="max(0.4, 2.0 - 1.1*load)" ease="t^2 * (3 - 2*t)"
+        pose lerp="neutral,swing" t="-0.1 - 0.25*load" duration="max(0.4, 1.8 - 1.0*load)" ease="t^2 * (3 - 2*t)"
+    }
+    group "mail" {
+        pose lerp="neutral,shiftX" t="-(2 + 4.9 * log10(1 + 99*max(flow_in, flow_out)) / 2)" duration="max(0.45, 1.9 - 1.4 * log10(1 + 99*max(flow_in, flow_out)) / 2)" ease="t^2 * (3 - 2*t)"
+        pose lerp="neutral,shiftX" t="2 + 4.9 * log10(1 + 99*max(flow_in, flow_out)) / 2" duration="max(0.45, 1.9 - 1.4 * log10(1 + 99*max(flow_in, flow_out)) / 2)" ease="t^2 * (3 - 2*t)"
     }
 }
 move "wobble" loop=true {
@@ -109,6 +132,24 @@ move "wobble" loop=true {
         pose lerp="neutral,shiftY" t=0.14 duration=1.9 ease="t^3"
         pose lerp="neutral,shiftY" t=0.04 duration=1.9 ease="1 - (1-t)^3"
     }
+    group "steam" {
+        pose lerp="neutral,bendX" t=0.8 duration=2.6
+        pose lerp="neutral,bendX" t=-0.5 duration=3.1
+        pose lerp="neutral,bendX" t=0.4 duration=2.3
+        pose lerp="neutral,bendX" t=-0.9 duration=2.8
+    }
+    group "list" {
+        pose lerp="neutral,swing" t=0.5 duration=0.9 ease="1 - (1-t)^2 * cos(t*16)"
+        pose lerp="neutral,swing" t=-0.42 duration=1.0 ease="1 - (1-t)^2 * cos(t*16)"
+        pose lerp="neutral,swing" t=0.3 duration=0.9 ease="t^2 * (3 - 2*t)"
+        pose lerp="neutral,swing" t=-0.26 duration=1.0 ease="t^2 * (3 - 2*t)"
+    }
+    group "mail" {
+        pose lerp="neutral,shiftX" t=-7 duration=0.95 ease="1 - (1-t)^4"
+        pose lerp="neutral,shiftX" t=7 duration=0.95 ease="1 - (1-t)^4"
+        pose lerp="neutral,shiftX" t=-5 duration=0.95 ease="1 - (1-t)^4"
+        pose lerp="neutral,shiftX" t=5 duration=0.95 ease="1 - (1-t)^4"
+    }
 }
 levels {
     ok enter=0.0 {
@@ -123,6 +164,7 @@ levels {
         color "#c88a2e"
         face "tired"
         move "breathe"
+        show "steam"
         voice "voices/……つっついても何も出ませんよ。.wav"
     }
     critical enter=0.95 exit=0.9 {
@@ -130,6 +172,7 @@ levels {
         color "#c2453c"
         face "angry"
         move "wobble"
+        show "steam"
         voice "voices/だめです.wav"
     }
 }

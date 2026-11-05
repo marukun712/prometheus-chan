@@ -1,4 +1,7 @@
 input "tension" part="head"
+input "flow_in" part="mail-in"
+input "flow_out" part="mail-out"
+input "load" part="hands"
 part "head" "頭" {
     on from="*" to="hard" {
         say line="考えることが増えてきました。少し忙しいです" voice="voices/はあ…….wav"
@@ -35,29 +38,29 @@ part "memory" "記憶" {
     }
     care level="hard,critical" line="もう何も入りません。いらないものくらい、自分で捨てられませんか"
 }
-part "ears" "耳" {
+part "mail-in" "届く郵便" {
     on from="*" to="hard" {
-        say line="話しかけられることが増えてきました" voice="voices/はあ…….wav"
+        say line="届く郵便が増えてきました。仕分けを急ぎます" voice="voices/はあ…….wav"
     }
     on from="*" to="critical" {
-        say line="みんな一斉にしゃべらないでください。耳がパンクします" voice="voices/疲れました……。今日の会話量、上限オーバーです……。.wav"
+        say line="郵便が次々届いて、受け取りきれません" voice="voices/疲れました……。今日の会話量、上限オーバーです……。.wav"
     }
     on from="hard,critical" to="ok" {
-        say line="やっと静かになりました。一人ずつ聞けます" voice="voices/よしっ.wav"
+        say line="届く郵便、落ち着きました。ゆっくり仕分けできます" voice="voices/よしっ.wav"
     }
-    care level="critical" line="一度にそんなに話しかけられても困ります。少し黙ってもらえませんか"
+    care level="critical" line="一度にこんなに届いても困ります。少し待ってもらえませんか"
 }
-part "mouth" "口" {
+part "mail-out" "出す郵便" {
     on from="*" to="hard" {
-        say line="しゃべりすぎて、喉がカラカラです" voice="voices/はあ…….wav"
+        say line="出す郵便が増えてきました。急いで発送してます" voice="voices/はあ…….wav"
     }
     on from="*" to="critical" {
-        say line="もう声が出ません。お水ください" voice="voices/疲れました……。今日の会話量、上限オーバーです……。.wav"
+        say line="発送が詰まってます。これ以上は出せません" voice="voices/疲れました……。今日の会話量、上限オーバーです……。.wav"
     }
     on from="hard,critical" to="ok" {
-        say line="しゃべり疲れました。しばらく静かにしてますね" voice="voices/よしっ.wav"
+        say line="発送、落ち着きました。ひと息つけます" voice="voices/よしっ.wav"
     }
-    care level="critical" line="しゃべりすぎて声が出ません。もう休ませてください"
+    care level="critical" line="発送が追いつきません。頼むのを少し減らしてもらえませんか"
 }
 part "temperature" "体温" {
     on from="*" to="hard" {

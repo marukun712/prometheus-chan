@@ -9,6 +9,7 @@ export const LevelSchema = z.object({
 	color: z.string(),
 	face: z.string().optional(),
 	move: z.string().optional(),
+	show: z.array(z.string()).default([]),
 	voice: z.string(),
 });
 export type Level = z.infer<typeof LevelSchema>;

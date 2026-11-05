@@ -73,6 +73,16 @@ export function makeApplyFace(nodes: SpriteNode[], faces: string[]) {
 	};
 }
 
+export function makeApplyProps(nodes: SpriteNode[], props: string[]) {
+	const switcher = new Switcher(nodes, props);
+
+	return (shown: string[]) => {
+		switcher.apply(
+			Object.fromEntries(props.map((prop) => [prop, shown.includes(prop)])),
+		);
+	};
+}
+
 export function makeAnims(move: Move, template: Record<string, Pose>) {
 	return new Map(
 		move.groups.map((group): [string, Animation] => {

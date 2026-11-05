@@ -13,6 +13,7 @@ import {
 	loadCharacter,
 	makeAnims,
 	makeApplyFace,
+	makeApplyProps,
 	makeBodyRig,
 	makeGroupRigs,
 	seqDuration,
@@ -151,12 +152,17 @@ async function main() {
 	const template = makeTemplate(bodyRig);
 	const applyFace = makeApplyFace(character.nodes, pack.faces);
 
+	const propNames = [...new Set(pack.levels.flatMap((level) => level.show))];
+	const applyProps = makeApplyProps(character.nodes, propNames);
+
 	let currentAnim = new Map<string, Animation>();
 	let playing: string | undefined;
 	let time = 0;
 	let backToLevel: ReturnType<typeof setTimeout> | undefined;
 
 	const levelFace = () => currentLevel(pack, profile, state.levelState)?.face;
+	const levelShow = () =>
+		currentLevel(pack, profile, state.levelState)?.show ?? [];
 
 	const play = (name?: string) => {
 		const target = name ?? currentLevel(pack, profile, state.levelState)?.move;
@@ -187,6 +193,7 @@ async function main() {
 		state = next;
 		moves = resolveMoves(pack, state.inputs);
 		renderState(stateView, pack, profile, state.levelState);
+		applyProps(levelShow());
 
 		if (playing === undefined) {
 			play();

@@ -1,4 +1,7 @@
 input "tension" part="head"
+input "flow_in" part="wan-rx"
+input "flow_out" part="wan-tx"
+input "load" part="desk"
 part "wan-rx" "外から届く郵便" {
     on from="*" to="hard" {
         say line="外からの郵便がたくさん届いてます。仕分けしますね" voice="voices/はあ…….wav"

@@ -54,6 +54,7 @@ function readPack(doc: Document) {
 			color: childArg(n, "color"),
 			face: childArg(n, "face"),
 			move: childArg(n, "move"),
+			show: n.children?.findNodeByName("show")?.getArguments() ?? [],
 			voice: childArg(n, "voice"),
 			enter: n.getProperty("enter"),
 			exit: n.getProperty("exit"),

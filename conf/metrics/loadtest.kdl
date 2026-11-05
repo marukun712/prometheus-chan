@@ -3,6 +3,6 @@ server port=3000
 query "head" "1 - avg(rate(node_cpu_seconds_total{mode=\"idle\"}[15s]))"
 query "hands" "max(1 - node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)"
 query "memory" "max(1 - node_filesystem_avail_bytes{mountpoint=\"/\"} / node_filesystem_size_bytes{mountpoint=\"/\"})"
-query "ears" "rate(node_network_receive_bytes_total{device!~\"lo|veth.*|docker.*|br-.*\"}[15s]) / node_network_speed_bytes"
-query "mouth" "rate(node_network_transmit_bytes_total{device!~\"lo|veth.*|docker.*|br-.*\"}[15s]) / node_network_speed_bytes"
+query "mail-in" "rate(node_network_receive_bytes_total{device!~\"lo|veth.*|docker.*|br-.*\"}[15s]) / node_network_speed_bytes"
+query "mail-out" "rate(node_network_transmit_bytes_total{device!~\"lo|veth.*|docker.*|br-.*\"}[15s]) / node_network_speed_bytes"
 query "temperature" "node_hwmon_temp_celsius / 100"
