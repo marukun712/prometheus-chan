@@ -1,8 +1,8 @@
 import { curve, type Pose, type Rig } from "@kokoro/rig";
 
 export const makeTemplate = (rig: Rig): Record<string, Pose> => {
-	const A = rig.h * 0.2;
-	const R = 0.3;
+	const A = rig.h * 0.25;
+	const R = 0.5;
 
 	return {
 		neutral: () => ({ tx: 0, ty: 0 }),

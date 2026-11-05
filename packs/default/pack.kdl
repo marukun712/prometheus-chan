@@ -24,9 +24,6 @@ group "mouth" {
 group "eyewear" {
     layer "glasses"
 }
-group "steam" {
-    layer "steam"
-}
 group "list" {
     layer "list"
 }
@@ -35,120 +32,84 @@ group "mail" {
 }
 move "breathe" loop=true {
     group "body" {
-        pose lerp="neutral,shiftY" t="0.12*tension" duration="2.0 - 1.2*tension" ease="t^2 * (3 - 2*t)"
-        pose lerp="neutral,shiftY" t="0.03*tension" duration="1.8 - 1.1*tension" ease="t^2 * (3 - 2*t)"
+        pose lerp="neutral,shiftY" t=0.1 duration=1.5 ease="t^2 * (3 - 2*t)"
+        pose "neutral" duration=1.5 ease="t^2 * (3 - 2*t)"
     }
     group "face" {
-        pose lerp="neutral,bendY" t="0.18 + 0.37*tension" duration="2.0 - 1.2*tension" ease="t^2 * (3 - 2*t)"
-        pose lerp="neutral,bendY" t="0.12*tension" duration="1.8 - 1.1*tension" ease="t^2 * (3 - 2*t)"
+        pose lerp="neutral,bendY" t=0.4 duration=1.5 ease="t^2 * (3 - 2*t)"
+        pose "neutral" duration=1.5 ease="t^2 * (3 - 2*t)"
     }
     group "hair" {
-        pose lerp="neutral,swing" t="0.08 + 0.02*tension" duration="2.0 - 1.2*tension" ease="t^2 * (3 - 2*t)"
-        pose lerp="neutral,swing" t="-0.06 - 0.02*tension" duration="1.8 - 1.1*tension" ease="t^2 * (3 - 2*t)"
+        pose lerp="neutral,swing" t=0.08 duration=1.5 ease="t^2 * (3 - 2*t)"
+        pose lerp="neutral,swing" t=-0.08 duration=1.5 ease="t^2 * (3 - 2*t)"
     }
     group "eyes" {
-        pose lerp="neutral,shiftX" t="0.15 + 0.03*tension" duration="0.25 + 0.05*tension" ease="1 - (1-t)^3"
-        pose lerp="neutral,shiftX" t="0.15 + 0.03*tension" duration="1.65 - 0.4*tension"
-        pose lerp="neutral,shiftX" t="-0.15 - 0.03*tension" duration="0.25 + 0.05*tension" ease="1 - (1-t)^3"
-        pose lerp="neutral,shiftX" t="-0.15 - 0.03*tension" duration="1.65 - 0.4*tension"
+        pose lerp="neutral,shiftX" t=0.15 duration=0.3 ease="1 - (1-t)^3"
+        pose lerp="neutral,shiftX" t=0.15 duration=1.2
+        pose lerp="neutral,shiftX" t=-0.15 duration=0.3 ease="1 - (1-t)^3"
+        pose lerp="neutral,shiftX" t=-0.15 duration=1.2
     }
     group "brow-l" {
-        pose lerp="neutral,shiftY" t="-0.08 + 0.24*tension" duration="2.0 - 1.2*tension" ease="t^2 * (3 - 2*t)"
-        pose lerp="neutral,shiftY" t="0.1*tension" duration="1.8 - 1.1*tension" ease="t^2 * (3 - 2*t)"
+        pose lerp="neutral,shiftY" t="0.2 * tension" duration=1.5
     }
     group "brow-r" {
-        pose lerp="neutral,shiftY" t="-0.08 + 0.24*tension" duration="2.0 - 1.2*tension" ease="t^2 * (3 - 2*t)"
-        pose lerp="neutral,shiftY" t="0.1*tension" duration="1.8 - 1.1*tension" ease="t^2 * (3 - 2*t)"
+        pose lerp="neutral,shiftY" t="0.2 * tension" duration=1.5
     }
     group "mouth" {
-        pose lerp="neutral,shiftY" t="0.2*tension" duration="2.0 - 1.2*tension" ease="t^2 * (3 - 2*t)"
-        pose "neutral" duration="1.8 - 1.1*tension" ease="t^2 * (3 - 2*t)"
+        pose lerp="neutral,shiftY" t="0.2 * tension" duration=1.5
     }
     group "eyewear" {
-        pose lerp="neutral,shiftY" t="0.08*tension" duration="2.0 - 1.2*tension" ease="t^3"
-        pose "neutral" duration="1.8 - 1.1*tension" ease="1 - (1-t)^3"
-    }
-    group "steam" {
-        pose lerp="neutral,bendX" t=0.8 duration=2.6
-        pose lerp="neutral,bendX" t=-0.5 duration=3.1
-        pose lerp="neutral,bendX" t=0.4 duration=2.3
-        pose lerp="neutral,bendX" t=-0.9 duration=2.8
+        pose lerp="neutral,shiftY" t=0.08 duration=1.5 ease="t^2 * (3 - 2*t)"
+        pose "neutral" duration=1.5 ease="t^2 * (3 - 2*t)"
     }
     group "list" {
-        pose lerp="neutral,swing" t="0.12 + 0.3*load" duration="max(0.4, 2.0 - 1.1*load)" ease="t^2 * (3 - 2*t)"
-        pose lerp="neutral,swing" t="-0.1 - 0.25*load" duration="max(0.4, 1.8 - 1.0*load)" ease="t^2 * (3 - 2*t)"
+        pose lerp="neutral,tilt" t="2 * load" duration="1 / (1 + load)"
+        pose lerp="neutral,tilt" t="-2 * load" duration="1 / (1 + load)"
     }
     group "mail" {
-        pose lerp="neutral,shiftX" t="-(2 + 4.9 * log10(1 + 99*max(flow_in, flow_out)) / 2)" duration="max(0.45, 1.9 - 1.4 * log10(1 + 99*max(flow_in, flow_out)) / 2)" ease="t^2 * (3 - 2*t)"
-        pose lerp="neutral,shiftX" t="2 + 4.9 * log10(1 + 99*max(flow_in, flow_out)) / 2" duration="max(0.45, 1.9 - 1.4 * log10(1 + 99*max(flow_in, flow_out)) / 2)" ease="t^2 * (3 - 2*t)"
+        pose lerp="neutral,shiftX" t="-15 * flow_in" duration="1 / (1 + flow_in)" ease="1 - (1-t)^3"
+        pose lerp="neutral,shiftX" t="15 * flow_out" duration="1 / (1 + flow_out)" ease="1 - (1-t)^3"
     }
 }
 move "wobble" loop=true {
     group "body" {
-        pose lerp="neutral,shiftX" t=0.22 duration=0.8 ease="t^2 * (3 - 2*t)"
-        pose lerp="neutral,shiftX" t=-0.18 duration=0.9 ease="t^2 * (3 - 2*t)"
-        pose lerp="neutral,shiftY" t=0.2 duration=0.6 ease="1 - (1-t)^3"
-        pose lerp="neutral,shiftX" t=0.12 duration=0.7 ease="t^2 * (3 - 2*t)"
-        pose lerp="neutral,shiftX" t=-0.1 duration=0.8 ease="t^2 * (3 - 2*t)"
+        pose lerp="neutral,shiftX" t=0.2 duration=0.9 ease="t^2 * (3 - 2*t)"
+        pose lerp="neutral,shiftX" t=-0.2 duration=0.9 ease="t^2 * (3 - 2*t)"
     }
     group "face" {
-        pose lerp="neutral,tilt" t=0.04 duration=0.8 ease="t^2 * (3 - 2*t)"
-        pose lerp="neutral,tilt" t=-0.035 duration=0.9 ease="t^2 * (3 - 2*t)"
-        pose lerp="neutral,bendY" t=0.3 duration=0.6 ease="1 - (1-t)^3"
-        pose lerp="neutral,bendX" t=0.25 duration=0.7 ease="t^2 * (3 - 2*t)"
-        pose lerp="neutral,bendX" t=-0.2 duration=0.8 ease="t^2 * (3 - 2*t)"
+        pose lerp="neutral,tilt" t=0.04 duration=0.9 ease="t^2 * (3 - 2*t)"
+        pose lerp="neutral,tilt" t=-0.04 duration=0.9 ease="t^2 * (3 - 2*t)"
     }
     group "hair" {
-        pose lerp="neutral,swing" t=-0.09 duration=0.8 ease="t^2 * (3 - 2*t)"
-        pose lerp="neutral,swing" t=0.08 duration=0.9 ease="t^2 * (3 - 2*t)"
-        pose lerp="neutral,swing" t=0.04 duration=0.6 ease="1 - (1-t)^2 * cos(t*20)"
-        pose lerp="neutral,swing" t=-0.07 duration=0.7 ease="t^2 * (3 - 2*t)"
-        pose lerp="neutral,swing" t=0.06 duration=0.8 ease="t^2 * (3 - 2*t)"
+        pose lerp="neutral,swing" t=0.09 duration=0.9 ease="t^2 * (3 - 2*t)"
+        pose lerp="neutral,swing" t=-0.09 duration=0.9 ease="t^2 * (3 - 2*t)"
     }
     group "eyes" {
-        pose lerp="neutral,shiftX" t=0.2 duration=0.4 ease="1 - (1-t)^3"
-        pose lerp="neutral,shiftX" t=0.2 duration=1.0
-        pose lerp="neutral,shiftY" t=0.18 duration=0.4 ease="1 - (1-t)^3"
-        pose lerp="neutral,shiftY" t=0.18 duration=1.0
-        pose lerp="neutral,shiftX" t=-0.2 duration=1.0 ease="t^2 * (3 - 2*t)"
+        pose lerp="neutral,shiftX" t=0.2 duration=0.3 ease="1 - (1-t)^3"
+        pose lerp="neutral,shiftX" t=0.2 duration=0.9
+        pose lerp="neutral,shiftX" t=-0.2 duration=0.3 ease="1 - (1-t)^3"
+        pose lerp="neutral,shiftX" t=-0.2 duration=0.9
     }
     group "brow-l" {
-        pose lerp="neutral,shiftY" t=0.2 duration=0.9 ease="t^2 * (3 - 2*t)"
-        pose lerp="neutral,shiftY" t=0.14 duration=1.0 ease="t^2 * (3 - 2*t)"
-        pose lerp="neutral,shiftY" t=0.24 duration=0.9 ease="t^2 * (3 - 2*t)"
-        pose lerp="neutral,shiftY" t=0.14 duration=1.0 ease="t^2 * (3 - 2*t)"
+        pose lerp="neutral,shiftY" t=0.24 duration=0.9
     }
     group "brow-r" {
-        pose lerp="neutral,shiftY" t=0.2 duration=0.9 ease="t^2 * (3 - 2*t)"
-        pose lerp="neutral,shiftY" t=0.14 duration=1.0 ease="t^2 * (3 - 2*t)"
-        pose lerp="neutral,shiftY" t=0.24 duration=0.9 ease="t^2 * (3 - 2*t)"
-        pose lerp="neutral,shiftY" t=0.14 duration=1.0 ease="t^2 * (3 - 2*t)"
+        pose lerp="neutral,shiftY" t=0.24 duration=0.9
     }
     group "mouth" {
-        pose lerp="neutral,shiftY" t=0.18 duration=1.9 ease="t^3"
-        pose lerp="neutral,shiftY" t=0.08 duration=1.9 ease="1 - (1-t)^3"
+        pose lerp="neutral,shiftY" t=0.18 duration=0.9
     }
     group "eyewear" {
-        pose lerp="neutral,shiftY" t=0.14 duration=1.9 ease="t^3"
-        pose lerp="neutral,shiftY" t=0.04 duration=1.9 ease="1 - (1-t)^3"
-    }
-    group "steam" {
-        pose lerp="neutral,bendX" t=0.8 duration=2.6
-        pose lerp="neutral,bendX" t=-0.5 duration=3.1
-        pose lerp="neutral,bendX" t=0.4 duration=2.3
-        pose lerp="neutral,bendX" t=-0.9 duration=2.8
+        pose lerp="neutral,shiftY" t=0.14 duration=1.8 ease="t^2 * (3 - 2*t)"
+        pose lerp="neutral,shiftY" t=0.04 duration=1.8 ease="t^2 * (3 - 2*t)"
     }
     group "list" {
-        pose lerp="neutral,swing" t=0.5 duration=0.9 ease="1 - (1-t)^2 * cos(t*16)"
-        pose lerp="neutral,swing" t=-0.42 duration=1.0 ease="1 - (1-t)^2 * cos(t*16)"
-        pose lerp="neutral,swing" t=0.3 duration=0.9 ease="t^2 * (3 - 2*t)"
-        pose lerp="neutral,swing" t=-0.26 duration=1.0 ease="t^2 * (3 - 2*t)"
+        pose lerp="neutral,tilt" t="2 * load" duration="1 / (1 + load)"
+        pose lerp="neutral,tilt" t="-2 * load" duration="1 / (1 + load)"
     }
     group "mail" {
-        pose lerp="neutral,shiftX" t=-7 duration=0.95 ease="1 - (1-t)^4"
-        pose lerp="neutral,shiftX" t=7 duration=0.95 ease="1 - (1-t)^4"
-        pose lerp="neutral,shiftX" t=-5 duration=0.95 ease="1 - (1-t)^4"
-        pose lerp="neutral,shiftX" t=5 duration=0.95 ease="1 - (1-t)^4"
+        pose lerp="neutral,shiftX" t="-15 * flow_in" duration="1 / (1 + flow_in)" ease="1 - (1-t)^3"
+        pose lerp="neutral,shiftX" t="15 * flow_out" duration="1 / (1 + flow_out)" ease="1 - (1-t)^3"
     }
 }
 levels {
@@ -162,17 +123,15 @@ levels {
     hard enter=0.6 exit=0.5 {
         label "すこし疲れています"
         color "#c88a2e"
-        face "tired"
+        face "angry"
         move "breathe"
-        show "steam"
         voice "voices/……つっついても何も出ませんよ。.wav"
     }
     critical enter=0.95 exit=0.9 {
         label "もう限界です"
         color "#c2453c"
-        face "angry"
+        face "tired"
         move "wobble"
-        show "steam"
         voice "voices/だめです.wav"
     }
 }
