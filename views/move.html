@@ -45,6 +45,23 @@
       list-style: none;
     }
 
+    #inputs {
+      margin: 10px 0 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    #inputs li {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    #inputs output {
+      min-width: 36px;
+      text-align: right;
+    }
+
     #replay {
       margin-top: 10px;
       padding: 6px 14px;
@@ -63,6 +80,7 @@
   <div id="panel">
     <p id="label"></p>
     <ul id="moves"></ul>
+    <ul id="inputs"></ul>
     <button id="replay" type="button" hidden>もう一度</button>
   </div>
   <script type="module" src="./move.ts"></script>

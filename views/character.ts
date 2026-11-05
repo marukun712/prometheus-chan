@@ -16,26 +16,10 @@ import {
 } from "@kokoro/rig";
 import { Container } from "pixi.js";
 import { Viewport } from "pixi-viewport";
-import {
-	type Group as GroupConf,
-	type Move,
-	type State,
-	StateSchema,
-} from "../src/schema.ts";
+import type { Group as GroupConf, Move } from "../src/schema.ts";
 
 const meshVertices = 50;
 const bodyGroup = "body";
-
-export async function fetchState(): Promise<State | null> {
-	try {
-		const res = await fetch("/state");
-		if (!res.ok) return null;
-		return StateSchema.parse(await res.json());
-	} catch (e) {
-		console.error(e);
-		return null;
-	}
-}
 
 export async function setupStage(stage: HTMLElement) {
 	const app = await setupCanvas(stage);
@@ -100,6 +84,7 @@ export function makeAnims(move: Move, template: Record<string, Pose>) {
 	);
 }
 
+// loop再生用に、seqの合計時間を求める
 export function seqDuration(seq: Move["groups"][number]["seq"]) {
 	let duration = 0;
 	for (const clip of seq) {

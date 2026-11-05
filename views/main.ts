@@ -1,9 +1,15 @@
 import type { Animation } from "@kokoro/rig";
-import { z } from "zod";
-import { type Message, MessageSchema, type State } from "../src/schema.ts";
+import {
+	type LevelState,
+	type Message,
+	MessageSchema,
+	type Pack,
+	type Profile,
+	type State,
+	StateSchema,
+} from "../src/schema.ts";
 import {
 	applyAnim,
-	fetchState,
 	loadCharacter,
 	makeAnims,
 	makeApplyFace,
@@ -12,17 +18,14 @@ import {
 	seqDuration,
 	setupStage,
 } from "./character.ts";
+import {
+	careLines,
+	currentLevel,
+	emptyInputs,
+	fetchPack,
+	resolveMoves,
+} from "./pack.ts";
 import { makeTemplate } from "./template.ts";
-
-function currentLevel(state: State) {
-	const current = state.parts.map((part) => state.levelState[part.id]);
-	return state.levels.filter((level) => current.includes(level.name)).at(-1);
-}
-
-function findMove(state: State, name?: string) {
-	const target = name ?? currentLevel(state)?.move;
-	return state.moves.find((move) => move.name === target);
-}
 
 const voicePlayer = new Audio();
 
@@ -40,13 +43,15 @@ async function playVoice(voice: string) {
 
 function listenMessages(
 	onMessage: (message: Message) => void,
-	onValues: () => void,
+	onState: (state: State) => void,
 ) {
 	const source = new EventSource("/messages");
 	source.onmessage = (ev) => {
 		onMessage(MessageSchema.parse(JSON.parse(ev.data)));
 	};
-	source.addEventListener("values", () => onValues());
+	source.addEventListener("state", (ev: MessageEvent) => {
+		onState(StateSchema.parse(JSON.parse(ev.data)));
+	});
 }
 
 function appendChatMessage(log: HTMLElement, message: Message) {
@@ -64,13 +69,18 @@ function appendChatMessage(log: HTMLElement, message: Message) {
 	log.scrollTop = log.scrollHeight;
 }
 
-function renderState(view: HTMLElement, state: State) {
+function renderState(
+	view: HTMLElement,
+	pack: Pack,
+	profile: Profile,
+	levelState: LevelState,
+) {
 	view.replaceChildren();
-	for (const part of state.parts) {
-		const levelName = state.levelState[part.id];
+	for (const part of profile.parts) {
+		const levelName = levelState[part.id];
 		if (!levelName) continue;
 
-		const level = state.levels.find((l) => l.name === levelName);
+		const level = pack.levels.find((l) => l.name === levelName);
 		if (!level) continue;
 
 		const item = document.createElement("span");
@@ -80,27 +90,25 @@ function renderState(view: HTMLElement, state: State) {
 	}
 }
 
-async function renderCare(view: HTMLElement) {
+function renderCare(
+	view: HTMLElement,
+	profile: Profile,
+	levelState: LevelState,
+) {
 	view.replaceChildren();
-	try {
-		const res = await fetch("/care");
-		if (!res.ok) return;
-		const lines = z.array(z.string()).parse(await res.json());
+	const lines = careLines(profile, levelState);
 
-		if (lines.length === 0) {
-			const item = document.createElement("li");
-			item.textContent = "特にないよ";
-			view.appendChild(item);
-			return;
-		}
+	if (lines.length === 0) {
+		const item = document.createElement("li");
+		item.textContent = "特にないよ";
+		view.appendChild(item);
+		return;
+	}
 
-		for (const line of lines) {
-			const item = document.createElement("li");
-			item.textContent = line;
-			view.appendChild(item);
-		}
-	} catch (e) {
-		console.error(e);
+	for (const line of lines) {
+		const item = document.createElement("li");
+		item.textContent = line;
+		view.appendChild(item);
 	}
 }
 
@@ -120,50 +128,52 @@ async function main() {
 	const careButton = document.getElementById("care-toggle");
 	if (!careButton) return;
 
-	careButton.addEventListener("click", async () => {
+	const loaded = await fetchPack();
+	if (!loaded) return;
+	const { pack, profile } = loaded;
+
+	let state: State = { inputs: emptyInputs(profile), levelState: {} };
+	let moves = resolveMoves(pack, state.inputs);
+
+	careButton.addEventListener("click", () => {
 		careView.hidden = !careView.hidden;
-		if (!careView.hidden) await renderCare(careView);
+		if (!careView.hidden) renderCare(careView, profile, state.levelState);
 	});
-
-	const initialState = await fetchState();
-	if (!initialState) return;
-
-	let state = initialState;
-	renderState(stateView, state);
 
 	const { app, viewport } = await setupStage(stage);
 
-	const character = await loadCharacter(`/pack/${state.psd}`);
+	const character = await loadCharacter(`/pack/${pack.psd}`);
 	viewport.addChild(character.container);
 
-	const bodyRig = makeBodyRig(character.nodes, state.groups);
-	const groupRigs = makeGroupRigs(character.nodes, state.groups);
+	const bodyRig = makeBodyRig(character.nodes, pack.groups);
+	const groupRigs = makeGroupRigs(character.nodes, pack.groups);
 
 	const template = makeTemplate(bodyRig);
-	const applyFace = makeApplyFace(character.nodes, state.faces);
+	const applyFace = makeApplyFace(character.nodes, pack.faces);
 
 	let currentAnim = new Map<string, Animation>();
 	let playing: string | undefined;
 	let time = 0;
 	let backToLevel: ReturnType<typeof setTimeout> | undefined;
 
-	const play = (state: State, name?: string) => {
-		const move = findMove(state, name);
+	const levelFace = () => currentLevel(pack, profile, state.levelState)?.face;
+
+	const play = (name?: string) => {
+		const target = name ?? currentLevel(pack, profile, state.levelState)?.move;
+		const move = moves.find((m) => m.name === target);
 		if (!move) return undefined;
 
 		playing = move.name;
 		currentAnim = makeAnims(move, template);
 		time = 0;
-		applyFace(move.face ?? currentLevel(state)?.face);
+		applyFace(move.face ?? levelFace());
 		return move;
 	};
-
-	play(state);
 
 	for (const node of character.nodes) {
 		node.sprite.eventMode = "static";
 		node.sprite.on("pointertap", () => {
-			const level = currentLevel(state);
+			const level = currentLevel(pack, profile, state.levelState);
 			if (level) playVoice(level.voice);
 		});
 	}
@@ -173,29 +183,28 @@ async function main() {
 		applyAnim(currentAnim, time, bodyRig, groupRigs);
 	});
 
-	const refresh = async () => {
-		const next = await fetchState();
-		if (!next) return;
+	const refresh = (next: State) => {
 		state = next;
-		renderState(stateView, state);
+		moves = resolveMoves(pack, state.inputs);
+		renderState(stateView, pack, profile, state.levelState);
 
-		const move = findMove(state, playing);
+		if (playing === undefined) {
+			play();
+			return;
+		}
+
+		const move = moves.find((m) => m.name === playing);
 		if (!move) return;
 		currentAnim = makeAnims(move, template);
-		applyFace(move.face ?? currentLevel(state)?.face);
+		applyFace(move.face ?? levelFace());
 	};
 
-	listenMessages(async (message) => {
+	listenMessages((message) => {
 		appendChatMessage(chatLog, message);
-
-		const next = await fetchState();
-		if (!next) return;
-		state = next;
-		renderState(stateView, state);
 
 		if (message.voice) playVoice(message.voice);
 
-		const move = play(state, message.move);
+		const move = play(message.move);
 		if (!move) return;
 
 		clearTimeout(backToLevel);
@@ -207,7 +216,7 @@ async function main() {
 		}
 
 		backToLevel = setTimeout(() => {
-			play(state);
+			play();
 		}, longest * 1000);
 	}, refresh);
 }

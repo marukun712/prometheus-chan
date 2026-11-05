@@ -1,38 +1,20 @@
 import { staticPlugin } from "@elysia/static";
-import type { SeqExpr } from "@kokoro/rig";
 import { Elysia } from "elysia";
-import { all, create } from "mathjs";
 import { query } from "./prometheus.ts";
-import type { ClipTemplate, Message, Metric, Pack, Profile } from "./schema.ts";
+import type { Inputs, Message, Metric, Pack, Profile } from "./schema.ts";
 
 type Line = Omit<Message, "time">;
-type Inputs = Record<string, number>;
 
 const textEncoder = new TextEncoder();
-const math = create(all);
+const packPrefix = "/pack";
 
 function pick<T>(items: T[]): T {
 	return items[Math.floor(Math.random() * items.length)];
 }
 
-function resolveValue(value: number | string, inputs: Inputs) {
-	if (typeof value === "number") return value;
-	return Number(math.evaluate(value, inputs));
-}
-
-function resolveSeq(seq: ClipTemplate[], inputs: Inputs): SeqExpr {
-	return seq.map((clip) => ({
-		...clip,
-		pose:
-			typeof clip.pose === "string"
-				? clip.pose
-				: { ...clip.pose, t: resolveValue(clip.pose.t, inputs) },
-		duration: resolveValue(clip.duration, inputs),
-	}));
-}
-
 export class CharacterRunner {
 	private assetsDir: string;
+	private profileName: string;
 	private pack: Pack;
 	private profile: Profile;
 	private metric: Metric;
@@ -42,8 +24,15 @@ export class CharacterRunner {
 	private listeners = new Set<(frame: string) => void>();
 	private lastMessage: Message | null = null;
 
-	constructor(assetsDir: string, pack: Pack, profile: Profile, metric: Metric) {
+	constructor(
+		assetsDir: string,
+		profileName: string,
+		pack: Pack,
+		profile: Profile,
+		metric: Metric,
+	) {
 		this.assetsDir = assetsDir;
+		this.profileName = profileName;
 		this.pack = pack;
 		this.profile = profile;
 		this.metric = metric;
@@ -65,13 +54,26 @@ export class CharacterRunner {
 		this.send("message", message);
 	}
 
-	// 入力名ごとに、profileで指定されたpartの値を入れる
 	private inputs(): Inputs {
 		const inputs: Inputs = {};
 		for (const input of this.profile.inputs) {
 			inputs[input.name] = this.values.get(input.part) ?? 0;
 		}
 		return inputs;
+	}
+
+	private state() {
+		return {
+			inputs: this.inputs(),
+			levelState: Object.fromEntries(this.levelState),
+		};
+	}
+
+	private conf() {
+		return {
+			pack: `${packPrefix}/pack.kdl`,
+			profile: `${packPrefix}/profiles/${this.profileName}.kdl`,
+		};
 	}
 
 	// valueからレベルを判定する
@@ -122,20 +124,6 @@ export class CharacterRunner {
 		return null;
 	}
 
-	// 現在のレベルに当てはまるおせわの要望だけを返す
-	private care(): string[] {
-		const lines: string[] = [];
-		for (const part of this.profile.parts) {
-			const level = this.levelState.get(part.id);
-			if (level === undefined) continue;
-
-			for (const entry of part.care) {
-				if (entry.level.includes(level)) lines.push(entry.line);
-			}
-		}
-		return lines;
-	}
-
 	private tickLevel(part: string, value: number) {
 		// 現在のレベルがない場合は、valueをそのまま評価
 		const before = this.levelState.get(part);
@@ -146,6 +134,9 @@ export class CharacterRunner {
 				: this.getLevel(value, before);
 		this.levelState.set(part, after);
 		if (before === after) return;
+
+		// メッセージより先に送り、フロントが新しいレベルで描画できるようにする
+		this.send("state", this.state());
 
 		const from = before ?? this.pack.levels[0].name;
 		const line = this.say(part, from, after);
@@ -167,36 +158,7 @@ export class CharacterRunner {
 			this.tickLevel(signal.part, value);
 		}
 
-		this.send("values", this.inputs());
-	}
-
-	private state() {
-		const inputs = this.inputs();
-		return {
-			psd: this.pack.psd,
-			faces: this.pack.faces,
-			groups: this.pack.groups,
-			moves: this.pack.moves.map((move) => ({
-				...move,
-				groups: move.groups.map((group) => ({
-					name: group.name,
-					seq: resolveSeq(group.seq, inputs),
-				})),
-			})),
-			levels: this.pack.levels.map((level) => ({
-				name: level.name,
-				label: level.label,
-				color: level.color,
-				face: level.face,
-				move: level.move,
-				voice: level.voice,
-			})),
-			parts: this.profile.parts.map((part) => ({
-				id: part.id,
-				label: part.label,
-			})),
-			levelState: Object.fromEntries(this.levelState),
-		};
+		this.send("state", this.state());
 	}
 
 	private messages(): Response {
@@ -206,6 +168,7 @@ export class CharacterRunner {
 				listener = (frame) => {
 					controller.enqueue(textEncoder.encode(frame));
 				};
+				listener(this.frame("state", this.state()));
 				if (this.lastMessage) listener(this.frame("message", this.lastMessage));
 				this.listeners.add(listener);
 			},
@@ -229,8 +192,7 @@ export class CharacterRunner {
 
 		const app = new Elysia()
 			.get("/messages", () => this.messages())
-			.get("/state", () => this.state())
-			.get("/care", () => this.care())
+			.get("/conf", () => this.conf())
 			.get(
 				"/move",
 				async () =>
@@ -241,7 +203,7 @@ export class CharacterRunner {
 			.use(
 				staticPlugin({
 					assets: this.assetsDir,
-					prefix: "/pack",
+					prefix: packPrefix,
 					decodeURI: true,
 				}),
 			)

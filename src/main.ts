@@ -1,4 +1,4 @@
-import { loadMetric, loadPack, loadProfile } from "./config.ts";
+import { loadMetric, loadPack, loadProfile } from "./load.ts";
 import { CharacterRunner } from "./runner.ts";
 
 const [target, metricFile] = Deno.args;
@@ -14,4 +14,4 @@ const pack = loadPack(`${packDir}/pack.kdl`);
 const profile = loadProfile(`${packDir}/profiles/${profileName}.kdl`);
 const metric = loadMetric(`./conf/metrics/${metricFile}`);
 
-new CharacterRunner(packDir, pack, profile, metric).start();
+new CharacterRunner(packDir, profileName, pack, profile, metric).start();

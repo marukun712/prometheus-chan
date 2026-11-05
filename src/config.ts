@@ -103,23 +103,16 @@ function readMetric(doc: Document) {
 	};
 }
 
-function load<T>(
-	path: string,
+function parse<T>(
+	text: string,
 	read: (doc: Document) => unknown,
 	schema: z.ZodType<T>,
 ): T {
-	const result = schema.safeParse(
-		read(parseCompat(Deno.readTextFileSync(path))),
-	);
-	if (!result.success) {
-		console.error(`${path} の設定が不正です`, result.error.issues);
-		Deno.exit(1);
-	}
-	return result.data;
+	return schema.parse(read(parseCompat(text)));
 }
 
-export const loadPack = (path: string) => load(path, readPack, PackSchema);
-export const loadProfile = (path: string) =>
-	load(path, readProfile, ProfileSchema);
-export const loadMetric = (path: string) =>
-	load(path, readMetric, MetricSchema);
+export const parsePack = (text: string) => parse(text, readPack, PackSchema);
+export const parseProfile = (text: string) =>
+	parse(text, readProfile, ProfileSchema);
+export const parseMetric = (text: string) =>
+	parse(text, readMetric, MetricSchema);

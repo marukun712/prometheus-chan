@@ -130,16 +130,19 @@ export const MessageSchema = z.object({
 });
 export type Message = z.infer<typeof MessageSchema>;
 
+export const ConfSchema = z.object({
+	pack: z.string(),
+	profile: z.string(),
+});
+export type Conf = z.infer<typeof ConfSchema>;
+
 export const StateSchema = z.object({
-	psd: z.string(),
-	faces: z.array(z.string()),
-	groups: z.array(GroupSchema),
-	moves: z.array(MoveSchema),
-	levels: z.array(LevelSchema),
-	parts: z.array(PartSchema),
+	inputs: z.record(z.string(), z.number()),
 	levelState: z.record(z.string(), z.string()),
 });
 export type State = z.infer<typeof StateSchema>;
+export type Inputs = State["inputs"];
+export type LevelState = State["levelState"];
 
 const LabelsSchema = z.record(z.string(), z.string());
 
