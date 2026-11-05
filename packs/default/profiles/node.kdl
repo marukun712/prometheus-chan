@@ -1,3 +1,4 @@
+input "tension" part="head"
 part "head" "頭" {
     on from="*" to="hard" {
         say line="考えることが増えてきました。少し忙しいです" voice="voices/はあ…….wav"

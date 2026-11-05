@@ -1,3 +1,4 @@
+input "tension" part="head"
 part "wan-rx" "外から届く郵便" {
     on from="*" to="hard" {
         say line="外からの郵便がたくさん届いてます。仕分けしますね" voice="voices/はあ…….wav"

@@ -23,14 +23,23 @@ const state: State = {
 	temperature: 1,
 };
 
-const stateKeys: (keyof State)[] = [
-	"cpu",
-	"memory",
-	"disk",
-	"rx",
-	"tx",
-	"temperature",
+type Control = {
+	key: keyof State;
+	label: string;
+	max: number;
+	step: number;
+};
+
+const controls: Control[] = [
+	{ key: "cpu", label: "CPU使用率", max: 1, step: 0.01 },
+	{ key: "memory", label: "メモリ使用率", max: 1, step: 0.01 },
+	{ key: "disk", label: "ディスク使用率", max: 1, step: 0.01 },
+	{ key: "rx", label: "受信帯域使用率", max: 1, step: 0.01 },
+	{ key: "tx", label: "送信帯域使用率", max: 1, step: 0.01 },
+	{ key: "temperature", label: "温度(C)", max: 100, step: 1 },
 ];
+
+const stateKeys = controls.map((control) => control.key);
 
 let cpuIdleSeconds = 0;
 let cpuUserSeconds = 0;
@@ -123,9 +132,89 @@ function buildMetrics(): string {
 	return `${lines.join("\n")}\n`;
 }
 
+function buildPage(): string {
+	const items = controls
+		.map(
+			(control) => `      <li>
+        <label for="${control.key}">${control.label}</label>
+        <input type="range" id="${control.key}" min="0" max="${control.max}" step="${control.step}" value="${state[control.key]}" />
+        <output id="${control.key}-value">${state[control.key]}</output>
+      </li>`,
+		)
+		.join("\n");
+
+	return `<!doctype html>
+<html lang="ja">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>loadtest exporter</title>
+  <style>
+    body {
+      margin: 0 auto;
+      padding: 24px 16px;
+      max-width: 520px;
+      font-family: sans-serif;
+      font-size: 15px;
+      color: #333333;
+    }
+
+    h1 {
+      margin: 0 0 20px;
+      font-size: 18px;
+    }
+
+    ul {
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    li {
+      display: grid;
+      grid-template-columns: 9em 1fr 4em;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 0;
+      border-bottom: 1px solid #e8e8e8;
+    }
+
+    output {
+      text-align: right;
+      font-variant-numeric: tabular-nums;
+    }
+  </style>
+</head>
+
+<body>
+  <h1>loadtest exporter</h1>
+  <ul>
+${items}
+  </ul>
+  <script>
+    for (const input of document.querySelectorAll("input[type=range]")) {
+      input.addEventListener("input", () => {
+        document.getElementById(input.id + "-value").textContent = input.value;
+        fetch("/state?" + input.id + "=" + input.value);
+      });
+    }
+  </script>
+</body>
+
+</html>
+`;
+}
+
 function handler(request: Request): Response {
 	const url = new URL(request.url);
 	advance();
+
+	if (url.pathname === "/") {
+		return new Response(buildPage(), {
+			headers: { "content-type": "text/html; charset=utf-8" },
+		});
+	}
 
 	if (url.pathname === "/metrics") {
 		return new Response(buildMetrics(), {

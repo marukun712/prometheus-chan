@@ -52,6 +52,7 @@ function readPack(doc: Document) {
 			name: n.getName(),
 			label: childArg(n, "label"),
 			color: childArg(n, "color"),
+			face: childArg(n, "face"),
 			move: childArg(n, "move"),
 			voice: childArg(n, "voice"),
 			enter: n.getProperty("enter"),
@@ -62,6 +63,10 @@ function readPack(doc: Document) {
 
 function readProfile(doc: Document) {
 	return {
+		inputs: doc.findNodesByName("input").map((n) => ({
+			name: arg(n),
+			part: n.getProperty("part"),
+		})),
 		parts: doc.findNodesByName("part").map((n) => ({
 			id: arg(n, 0),
 			label: arg(n, 1),

@@ -1,14 +1,34 @@
 import { staticPlugin } from "@elysia/static";
+import type { SeqExpr } from "@kokoro/rig";
 import { Elysia } from "elysia";
+import { all, create } from "mathjs";
 import { query } from "./prometheus.ts";
-import type { Message, Metric, Pack, Profile } from "./schema.ts";
+import type { ClipTemplate, Message, Metric, Pack, Profile } from "./schema.ts";
 
 type Line = Omit<Message, "time">;
+type Inputs = Record<string, number>;
 
 const textEncoder = new TextEncoder();
+const math = create(all);
 
 function pick<T>(items: T[]): T {
 	return items[Math.floor(Math.random() * items.length)];
+}
+
+function resolveValue(value: number | string, inputs: Inputs) {
+	if (typeof value === "number") return value;
+	return Number(math.evaluate(value, inputs));
+}
+
+function resolveSeq(seq: ClipTemplate[], inputs: Inputs): SeqExpr {
+	return seq.map((clip) => ({
+		...clip,
+		pose:
+			typeof clip.pose === "string"
+				? clip.pose
+				: { ...clip.pose, t: resolveValue(clip.pose.t, inputs) },
+		duration: resolveValue(clip.duration, inputs),
+	}));
 }
 
 export class CharacterRunner {
@@ -18,7 +38,8 @@ export class CharacterRunner {
 	private metric: Metric;
 
 	private levelState = new Map<string, string>();
-	private messageListeners = new Set<(message: Message) => void>();
+	private values = new Map<string, number>();
+	private listeners = new Set<(frame: string) => void>();
 	private lastMessage: Message | null = null;
 
 	constructor(assetsDir: string, pack: Pack, profile: Profile, metric: Metric) {
@@ -28,12 +49,29 @@ export class CharacterRunner {
 		this.metric = metric;
 	}
 
+	private frame(event: string, data: unknown) {
+		return `event: ${event}\ndata: ${JSON.stringify(data)}\n\n`;
+	}
+
+	private send(event: string, data: unknown) {
+		for (const listener of this.listeners) {
+			listener(this.frame(event, data));
+		}
+	}
+
 	private publish(line: Line) {
 		const message: Message = { ...line, time: Date.now() };
 		this.lastMessage = message;
-		for (const listener of this.messageListeners) {
-			listener(message);
+		this.send("message", message);
+	}
+
+	// 入力名ごとに、profileで指定されたpartの値を入れる
+	private inputs(): Inputs {
+		const inputs: Inputs = {};
+		for (const input of this.profile.inputs) {
+			inputs[input.name] = this.values.get(input.part) ?? 0;
 		}
+		return inputs;
 	}
 
 	// valueからレベルを判定する
@@ -125,20 +163,31 @@ export class CharacterRunner {
 			const value = Number(sample[1]);
 			console.log(signal, value);
 
+			this.values.set(signal.part, value);
 			this.tickLevel(signal.part, value);
 		}
+
+		this.send("values", this.inputs());
 	}
 
 	private state() {
+		const inputs = this.inputs();
 		return {
 			psd: this.pack.psd,
 			faces: this.pack.faces,
 			groups: this.pack.groups,
-			moves: this.pack.moves,
+			moves: this.pack.moves.map((move) => ({
+				...move,
+				groups: move.groups.map((group) => ({
+					name: group.name,
+					seq: resolveSeq(group.seq, inputs),
+				})),
+			})),
 			levels: this.pack.levels.map((level) => ({
 				name: level.name,
 				label: level.label,
 				color: level.color,
+				face: level.face,
 				move: level.move,
 				voice: level.voice,
 			})),
@@ -151,19 +200,17 @@ export class CharacterRunner {
 	}
 
 	private messages(): Response {
-		let listener: (message: Message) => void;
+		let listener: (frame: string) => void;
 		const stream = new ReadableStream({
 			start: (controller) => {
-				listener = (message) => {
-					controller.enqueue(
-						textEncoder.encode(`data: ${JSON.stringify(message)}\n\n`),
-					);
+				listener = (frame) => {
+					controller.enqueue(textEncoder.encode(frame));
 				};
-				if (this.lastMessage) listener(this.lastMessage);
-				this.messageListeners.add(listener);
+				if (this.lastMessage) listener(this.frame("message", this.lastMessage));
+				this.listeners.add(listener);
 			},
 			cancel: () => {
-				this.messageListeners.delete(listener);
+				this.listeners.delete(listener);
 			},
 		});
 		return new Response(stream, {

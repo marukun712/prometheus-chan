@@ -38,11 +38,15 @@ async function playVoice(voice: string) {
 	}
 }
 
-function listenMessages(onMessage: (message: Message) => void) {
+function listenMessages(
+	onMessage: (message: Message) => void,
+	onValues: () => void,
+) {
 	const source = new EventSource("/messages");
 	source.onmessage = (ev) => {
 		onMessage(MessageSchema.parse(JSON.parse(ev.data)));
 	};
+	source.addEventListener("values", () => onValues());
 }
 
 function appendChatMessage(log: HTMLElement, message: Message) {
@@ -139,6 +143,7 @@ async function main() {
 	const applyFace = makeApplyFace(character.nodes, state.faces);
 
 	let currentAnim = new Map<string, Animation>();
+	let playing: string | undefined;
 	let time = 0;
 	let backToLevel: ReturnType<typeof setTimeout> | undefined;
 
@@ -146,9 +151,10 @@ async function main() {
 		const move = findMove(state, name);
 		if (!move) return undefined;
 
+		playing = move.name;
 		currentAnim = makeAnims(move, template);
 		time = 0;
-		applyFace(move.face);
+		applyFace(move.face ?? currentLevel(state)?.face);
 		return move;
 	};
 
@@ -166,6 +172,18 @@ async function main() {
 		time += ticker.deltaMS / 1000;
 		applyAnim(currentAnim, time, bodyRig, groupRigs);
 	});
+
+	const refresh = async () => {
+		const next = await fetchState();
+		if (!next) return;
+		state = next;
+		renderState(stateView, state);
+
+		const move = findMove(state, playing);
+		if (!move) return;
+		currentAnim = makeAnims(move, template);
+		applyFace(move.face ?? currentLevel(state)?.face);
+	};
 
 	listenMessages(async (message) => {
 		appendChatMessage(chatLog, message);
@@ -191,7 +209,7 @@ async function main() {
 		backToLevel = setTimeout(() => {
 			play(state);
 		}, longest * 1000);
-	});
+	}, refresh);
 }
 
 main();

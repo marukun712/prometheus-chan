@@ -1,4 +1,4 @@
-import { SeqExprSchema } from "@kokoro/rig";
+import { EaseExprSchema, SeqExprSchema } from "@kokoro/rig";
 import { z } from "zod";
 
 const SplitStringSchema = z.string().transform((s) => s.split(","));
@@ -7,6 +7,7 @@ export const LevelSchema = z.object({
 	name: z.string(),
 	label: z.string(),
 	color: z.string(),
+	face: z.string().optional(),
 	move: z.string().optional(),
 	voice: z.string(),
 });
@@ -38,13 +39,31 @@ export const MoveSchema = z.object({
 
 export type Move = z.infer<typeof MoveSchema>;
 
+const ValueSchema = z.union([z.number(), z.string()]);
+
+const ClipTemplateSchema = z.object({
+	pose: z.union([
+		z.string(),
+		z.object({ lerp: z.tuple([z.string(), z.string()]), t: ValueSchema }),
+	]),
+	duration: ValueSchema,
+	ease: EaseExprSchema.optional(),
+});
+export type ClipTemplate = z.infer<typeof ClipTemplateSchema>;
+
+export const MoveTemplateSchema = MoveSchema.extend({
+	groups: z.array(
+		z.object({ name: z.string(), seq: z.array(ClipTemplateSchema) }),
+	),
+});
+
 export const PackSchema = z.object({
 	id: z.string(),
 	name: z.string(),
 	psd: z.string(),
 	faces: z.array(z.string()),
 	groups: z.array(GroupSchema),
-	moves: z.array(MoveSchema),
+	moves: z.array(MoveTemplateSchema),
 	levels: z.array(
 		LevelSchema.extend({
 			enter: z.number(),
@@ -63,6 +82,7 @@ const SaysSchema = z.array(
 );
 
 export const ProfileSchema = z.object({
+	inputs: z.array(z.object({ name: z.string(), part: z.string() })),
 	parts: z.array(
 		PartSchema.extend({
 			on: z.array(
