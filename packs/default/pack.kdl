@@ -67,8 +67,8 @@ move "breathe" loop=true {
         pose lerp="neutral,tilt" t="-2 * load" duration="1 / (1 + load)"
     }
     group "mail" {
-        pose lerp="neutral,shiftX" t="-15 * flow_in" duration="1 / (1 + flow_in)" ease="1 - (1-t)^3"
-        pose lerp="neutral,shiftX" t="15 * flow_out" duration="1 / (1 + flow_out)" ease="1 - (1-t)^3"
+        pose lerp="neutral,shiftX" t="-15 * flow_out" duration="1 / (1 + flow_out)" ease="1 - (1-t)^3"
+        pose lerp="neutral,shiftX" t="15 * flow_in" duration="1 / (1 + flow_in)" ease="1 - (1-t)^3"
     }
 }
 move "wobble" loop=true {
@@ -108,8 +108,8 @@ move "wobble" loop=true {
         pose lerp="neutral,tilt" t="-2 * load" duration="1 / (1 + load)"
     }
     group "mail" {
-        pose lerp="neutral,shiftX" t="-15 * flow_in" duration="1 / (1 + flow_in)" ease="1 - (1-t)^3"
-        pose lerp="neutral,shiftX" t="15 * flow_out" duration="1 / (1 + flow_out)" ease="1 - (1-t)^3"
+        pose lerp="neutral,shiftX" t="-15 * flow_out" duration="1 / (1 + flow_out)" ease="1 - (1-t)^3"
+        pose lerp="neutral,shiftX" t="15 * flow_in" duration="1 / (1 + flow_in)" ease="1 - (1-t)^3"
     }
 }
 levels {
